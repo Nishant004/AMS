@@ -19,19 +19,32 @@ namespace AMS.Data
             _tableName = typeof(T).Name; // Assumes table name = class name
         }
 
-        //public async Task<IEnumerable<T>> GetAllAsync()
-        //{
-        //    var query = $"SELECT * FROM {_tableName}";
-        //    using var connection = _context.CreateConnection();
-        //    return await connection.QueryAsync<T>(query);
-        //}
 
         public async Task<IEnumerable<T>> GetAllAsync()
         {
-            var query = $"SELECT * FROM {_tableName} WHERE IsDelete = 0";
-            using var connection = _context.CreateConnection();
+            
+            string query;
 
+            if (typeof(T).GetProperty("IsDelete") != null)
+            {
+                // Table has 'IsDelete' property => apply filter
+                query = $"SELECT * FROM [{_tableName}] WHERE IsDelete = 0";
+            }
+            else
+            {
+                // Table has no 'IsDelete' => simple select
+                query = $"SELECT * FROM [{_tableName}] WHERE Role = 'employee'";
+                //query = $"SELECT * FROM [{_tableName}]";
+            }
+
+            using var connection = _context.CreateConnection();
             return await connection.QueryAsync<T>(query);
+
+
+            //var query = $"SELECT * FROM {_tableName} WHERE IsDelete = 0";
+            //using var connection = _context.CreateConnection();
+
+            //return await connection.QueryAsync<T>(query);
 
             //var result = await connection.QueryAsync<T>(query);
 
@@ -42,7 +55,7 @@ namespace AMS.Data
             //}
 
             //return result;
-        
+
 
 
         }
@@ -59,30 +72,74 @@ namespace AMS.Data
             return await connection.QuerySingleOrDefaultAsync<T>(query, new { Id = id });
         }
 
+
         public async Task<int> InsertAsync(T entity)
         {
-            //var props = typeof(T).GetProperties()
-            //    .Where(p =>
-            //    {
-            //        var attr = p.GetCustomAttributes(true);
-            //        return !attr.Any(a =>
-            //            a is System.ComponentModel.DataAnnotations.KeyAttribute ||
-            //            (a is System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedAttribute dg && dg.DatabaseGeneratedOption == System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.Identity)
-            //        );
-            //    })
-            //    .ToList();
             var props = typeof(T).GetProperties()
-                .Where(p =>
-                    !(p.Name.ToLower().EndsWith("id") && p.PropertyType == typeof(int)) // Exclude identity column
-                )
+                .Where(p => !(p.Name.ToLower().EndsWith("id") && p.PropertyType == typeof(int))) // Exclude identity column
                 .ToList();
+
             var columnNames = string.Join(", ", props.Select(p => p.Name));
             var paramNames = string.Join(", ", props.Select(p => "@" + p.Name));
-            var query = $"INSERT INTO {_tableName} ({columnNames}) VALUES ({paramNames})";
+
+            var query = $"INSERT INTO [{_tableName}] ({columnNames}) VALUES ({paramNames}); SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
             using var connection = _context.CreateConnection();
-            return await connection.ExecuteAsync(query, entity);
+            var insertedId = await connection.ExecuteScalarAsync<int>(query, entity);
+
+            return insertedId;
         }
+
+
+        //public async Task<int> InsertAsync(T entity)
+        //{
+
+
+        //    var props = typeof(T).GetProperties()
+        //        .Where(p =>
+        //            !(p.Name.ToLower().EndsWith("id") && p.PropertyType == typeof(int)) // Exclude identity column
+        //        )
+        //        .ToList();
+        //    var columnNames = string.Join(", ", props.Select(p => p.Name));
+        //    var paramNames = string.Join(", ", props.Select(p => "@" + p.Name));
+        //    var query = $"INSERT INTO {_tableName} ({columnNames}) VALUES ({paramNames})";
+
+        //    using var connection = _context.CreateConnection();
+        //    return await connection.ExecuteAsync(query, entity);
+        //}
+
+        //var props = typeof(T).GetProperties()
+        //    .Where(p =>
+        //    {
+        //        var attr = p.GetCustomAttributes(true);
+        //        return !attr.Any(a =>
+        //            a is System.ComponentModel.DataAnnotations.KeyAttribute ||
+        //            (a is System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedAttribute dg && dg.DatabaseGeneratedOption == System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.Identity)
+        //        );
+        //    })
+        //    .ToList();
+
+
+
+
+
+
+        //public async Task<int> AddAsync(T entity)
+        //{
+        //    var properties = typeof(T).GetProperties().Where(p => p.CanWrite);
+        //    var columnNames = string.Join(", ", properties.Select(p => p.Name));
+        //    var parameterNames = string.Join(", ", properties.Select(p => "@" + p.Name));
+
+        //    var query = $"INSERT INTO [{_tableName}] ({columnNames}) VALUES ({parameterNames})";
+        //    using var connection = _context.CreateConnection();
+        //    return await connection.ExecuteAsync(query, entity);
+        //}
+
+
+
+
+
+
 
         public async Task<int> UpdateAsync(string idColumn, T entity)
         {
@@ -138,7 +195,7 @@ namespace AMS.Data
         //    return await connection.QuerySingleOrDefaultAsync<T>(query, new { Username = username, Password = password, Role = role });
         //}
 
-   
+
 
 
 
@@ -258,9 +315,9 @@ namespace AMS.Data
             using var connection = _context.CreateConnection();
             await connection.OpenAsync(); // 👈 Ensure the connection is open
 
-       
 
-                var query = @"
+
+            var query = @"
             UPDATE Attendance 
             SET 
                 CheckOutTime = @CheckOutTime,
@@ -296,27 +353,27 @@ namespace AMS.Data
                       double? checkInLong,
                       double? checkOutLat,
                       double? checkOutLong)
-                        {
-                            using var connection = _context.CreateConnection();
-                            await connection.OpenAsync();
+        {
+            using var connection = _context.CreateConnection();
+            await connection.OpenAsync();
 
-                            var query = @"
+            var query = @"
                         INSERT INTO AttendanceLogs 
                         (AttendanceID, CheckInTime, CheckOutTime, CheckInLat, CheckInLong, CheckOutLat, CheckOutLong, LogDateTime)
                         VALUES 
                         (@AttendanceID, @CheckInTime, @CheckOutTime, @CheckInLat, @CheckInLong, @CheckOutLat, @CheckOutLong, GETDATE())";
 
-                            await connection.ExecuteAsync(query, new
-                            {
-                                AttendanceID = attendanceId,
-                                CheckInTime = checkInTime,
-                                CheckOutTime = checkOutTime,
-                                CheckInLat = checkInLat,
-                                CheckInLong = checkInLong,
-                                CheckOutLat = checkOutLat,
-                                CheckOutLong = checkOutLong
-                            });
-                        }
+            await connection.ExecuteAsync(query, new
+            {
+                AttendanceID = attendanceId,
+                CheckInTime = checkInTime,
+                CheckOutTime = checkOutTime,
+                CheckInLat = checkInLat,
+                CheckInLong = checkInLong,
+                CheckOutLat = checkOutLat,
+                CheckOutLong = checkOutLong
+            });
+        }
 
 
 
@@ -358,7 +415,7 @@ namespace AMS.Data
 
 
 
-     
+
 
 
         public async Task<bool> CheckInAsync(int employeeId, string ip, double? checkInLat, double? checkInLong, string followUpShift)
@@ -383,19 +440,19 @@ namespace AMS.Data
                             (@EmployeeId, GETDATE(), @CheckInTime, 'Present', @CheckinIP, @CheckInLat, @CheckInLong, @FollowUpShift);
                     END";
 
-                        var parameters = new
-                        {
-                            EmployeeId = employeeId,
-                            CheckInTime = DateTime.Now.TimeOfDay,
-                            CheckinIP = ip,
-                            CheckInLat = checkInLat,
-                            CheckInLong = checkInLong,
-                            FollowUpShift = followUpShift ?? "No" // Default to "No" if not provided
-                        };
+            var parameters = new
+            {
+                EmployeeId = employeeId,
+                CheckInTime = DateTime.Now.TimeOfDay,
+                CheckinIP = ip,
+                CheckInLat = checkInLat,
+                CheckInLong = checkInLong,
+                FollowUpShift = followUpShift ?? "No" // Default to "No" if not provided
+            };
 
-                        using var connection = _context.CreateConnection();
-                        var result = await connection.ExecuteAsync(sql, parameters);
-                        return result > 0;
+            using var connection = _context.CreateConnection();
+            var result = await connection.ExecuteAsync(sql, parameters);
+            return result > 0;
         }
 
 
@@ -480,6 +537,53 @@ namespace AMS.Data
             });
 
             return result;
+        }
+
+
+
+        public async Task<T> GetFirstAsync(string orderByColumn, Dictionary<string, object> filters = null)
+        {
+            using (var connection = _context.CreateConnection())
+            {
+                var (whereClause, parameters) = BuildDynamicFilter(filters ?? new());
+                string query = $"SELECT * FROM {_tableName} {whereClause} ORDER BY {orderByColumn} ASC LIMIT 1";
+                return await connection.QueryFirstOrDefaultAsync<T>(query, parameters);
+            }
+        }
+
+        private (string, DynamicParameters) BuildDynamicFilter(Dictionary<string, object> filters)
+        {
+            var parameters = new DynamicParameters();
+            var conditions = new List<string>();
+
+            foreach (var filter in filters)
+            {
+                if (filter.Value == null)
+                {
+                    conditions.Add($"{filter.Key} IS NULL");
+                }
+                else
+                {
+                    conditions.Add($"{filter.Key} = @{filter.Key}");
+                    parameters.Add($"@{filter.Key}", filter.Value);
+                }
+            }
+
+            string whereClause = conditions.Any() ? "WHERE " + string.Join(" AND ", conditions) : "";
+            return (whereClause, parameters);
+        }
+
+
+
+
+
+        public async Task<T?> GetByUsernameAsync(string username)
+        {
+
+
+            var query = $"SELECT * FROM [{_tableName}] WHERE Username = @Username";
+            using var connection = _context.CreateConnection();
+            return await connection.QueryFirstOrDefaultAsync<T>(query, new { Username = username });
         }
 
      

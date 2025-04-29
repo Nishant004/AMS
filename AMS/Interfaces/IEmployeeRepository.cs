@@ -33,5 +33,9 @@ namespace AMS.Interfaces
         Task<IEnumerable<EmpAttendanceDto>> GetAttendanceByMonthYearAsyncById(int employeeId, int month, int year);
 
 
+        Task<IEnumerable<Employees>> GetAllAsync();
+
+
+        Task<Employees?> GetByIdAsync(string idColumn, int id); // Get by ID
     }
 }

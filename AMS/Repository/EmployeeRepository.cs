@@ -9,13 +9,15 @@ namespace AMS.Repository
     {
 
         public IGenericRepository<Attendance> _employeeAttendance { get; }
-        
+        public IGenericRepository<Employees> _employeeGenRepository { get; }
 
-        public EmployeeRepository(IGenericRepository<Attendance> employeeAttendance) 
-        
+
+        public EmployeeRepository(IGenericRepository<Attendance> employeeAttendance, IGenericRepository<Employees> employeeGenRepository)
+
         {
 
             _employeeAttendance = employeeAttendance;
+            _employeeGenRepository = employeeGenRepository;
 
         }
 
@@ -26,7 +28,7 @@ namespace AMS.Repository
 
 
 
-        
+
         public Task<Attendance?> GetAttendanceByEmployeeDateAsync(int employeeId, DateTime date)
         {
             return _employeeAttendance.GetAttendanceByEmployeeDateAsync(employeeId, date);
@@ -45,7 +47,7 @@ namespace AMS.Repository
         //attendCon
         public Task<EmployeeAttendanceDto?> GetEmployeeAttendanceByDateAsync(int employeeId)
         {
-           return _employeeAttendance.GetEmployeeAttendanceByDateAsync(employeeId);
+            return _employeeAttendance.GetEmployeeAttendanceByDateAsync(employeeId);
         }
 
 
@@ -57,7 +59,7 @@ namespace AMS.Repository
 
         public Task<bool> CheckInAsync(int employeeId, string ip, double? checkInLat, double? checkInLong, string followUpShift)
         {
-         return _employeeAttendance.CheckInAsync(employeeId,ip, checkInLat, checkInLong, followUpShift);
+            return _employeeAttendance.CheckInAsync(employeeId, ip, checkInLat, checkInLong, followUpShift);
         }
 
 
@@ -77,5 +79,20 @@ namespace AMS.Repository
         {
             return _employeeAttendance.GetAttendanceByMonthYearAsyncById(employeeId, month, year);
         }
+
+
+        public async Task<IEnumerable<Employees>> GetAllAsync()
+        {
+            return await _employeeGenRepository.GetAllAsync();
+        }
+
+
+        public async Task<Employees?> GetByIdAsync(string idColumn, int id)
+        {
+            return await _employeeGenRepository.GetByIdAsync(idColumn, id);
+        }
+
+
+
     }
 }

@@ -32,6 +32,7 @@ public static class ServiceConfiguration
         // REPOSITORIES
         services.AddScoped<IAdminRepository, AdminRepository>();
         services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
 
         return services;
     }

@@ -22,9 +22,9 @@ namespace AMS.Data
         //Task<T> GetByUserCredentialsAsync(string usernameColumn, string passwordColumn, string roleColumn, string username, string password, string role);
 
 
-           Task<(T? user, bool isDeactivated)> GetByUserCredentialsAsync<T>(
-            string usernameColumn, string passwordColumn, string roleColumn,
-            string username, string password, string role) where T : class;
+        Task<(T? user, bool isDeactivated)> GetByUserCredentialsAsync<T>(
+         string usernameColumn, string passwordColumn, string roleColumn,
+         string username, string password, string role) where T : class;
 
 
 
@@ -70,6 +70,18 @@ namespace AMS.Data
 
         Task<IEnumerable<EmpAttendanceDto>> GetAttendanceByMonthYearAsyncById(int employeeId, int month, int year);
 
+
+
+
+
+
+        //User controller
+
+        Task<T> GetFirstAsync(string orderByColumn, Dictionary<string, object> filters = null);
+
+        Task<T?> GetByUsernameAsync(string username);
+
+        //Task<int> AddAsync(User user);
 
 
     }

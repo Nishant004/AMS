@@ -44,6 +44,17 @@ namespace AMS.Repository
         }
 
 
+        public async Task<User> GetByIdAsync(string idColumn, int id)
+        {
+
+            return await _userGenRepository.GetByIdAsync(idColumn, id);
+        }
+
+        public async Task<int> DeleteAsync(string idColumn,int id)
+        {
+            return await _userGenRepository.DeleteAsyncPermanent(idColumn, id);
+
+        }
 
 
         //public async Task<User?> GetByIdAsync(string idColumn, int id)
@@ -51,12 +62,12 @@ namespace AMS.Repository
         //      return await _userGenRepository.GetByIdAsync(idColumn, id);
         //}
 
-
-
-        public Task<int> DeleteAsync(int id)
+        public async Task<int> UpdateAsync(string idColumn, User entity)
         {
-            throw new NotImplementedException();
+            return await _userGenRepository.UpdateAsync(idColumn, entity);
         }
+
+
     }
 }
 

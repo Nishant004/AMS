@@ -83,6 +83,6 @@ namespace AMS.Data
 
         //Task<int> AddAsync(User user);
 
-
+        Task<int> DeleteAsyncPermanent(string idColumn, int id); // Delete by ID
     }
 }

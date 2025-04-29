@@ -1,0 +1,13 @@
+﻿@model AMS.Models.User
+
+<h1>Delete User</h1>
+
+<h4>Are you sure you want to delete the user "@Model.Username"?</h4>
+
+<form asp-area="Admin" asp-controller="User" asp-action="DeleteConfirm" method="post">
+    @* <input asp-for="UserId" type="hidden" /> *@
+    <input type="hidden" name="id" value="@Model.UserId" />
+    <button type="submit" class="btn btn-danger">Delete</button>
+</form>
+
+<a asp-area="Admin" asp-controller="User" asp-action="Index" class="btn btn-secondary mt-3">Back To List</a>

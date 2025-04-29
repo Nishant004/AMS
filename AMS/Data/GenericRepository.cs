@@ -67,7 +67,7 @@ namespace AMS.Data
 
         public async Task<T> GetByIdAsync(string idColumn, int id)
         {
-            var query = $"SELECT * FROM {_tableName} WHERE {idColumn} = @Id";
+            var query = $"SELECT * FROM [{_tableName}] WHERE {idColumn} = @Id";
             using var connection = _context.CreateConnection();
             return await connection.QuerySingleOrDefaultAsync<T>(query, new { Id = id });
         }
@@ -145,7 +145,7 @@ namespace AMS.Data
         {
             var props = typeof(T).GetProperties().Where(p => p.Name.ToLower() != idColumn.ToLower()).ToList();
             var setClause = string.Join(", ", props.Select(p => $"{p.Name} = @{p.Name}"));
-            var query = $"UPDATE {_tableName} SET {setClause} WHERE {idColumn} = @{idColumn}";
+            var query = $"UPDATE [{_tableName}] SET {setClause} WHERE {idColumn} = @{idColumn}";
 
             using var connection = _context.CreateConnection();
             return await connection.ExecuteAsync(query, entity);
@@ -162,16 +162,24 @@ namespace AMS.Data
 
         public async Task<int> DeleteAsync(string idColumn, int id)
         {
-            var query = $"UPDATE {_tableName} SET IsDelete = 1 WHERE {idColumn} = @Id";
+            var query = $"UPDATE [{_tableName}] SET IsDelete = 1 WHERE {idColumn} = @Id";
             using var connection = _context.CreateConnection();
             return await connection.ExecuteAsync(query, new { Id = id });
         }
         //show hidden deactivate employee
         public async Task<IEnumerable<T>> GetAllDeletedAsync()
         {
-            var query = $"SELECT * FROM {_tableName} WHERE IsDelete = 1";
+            var query = $"SELECT * FROM [{_tableName}] WHERE IsDelete = 1";
             using var connection = _context.CreateConnection();
             return await connection.QueryAsync<T>(query);
+        }
+
+
+        public async Task<int> DeleteAsyncPermanent(string idColumn, int id)
+        {
+            var query = $"DELETE FROM [{_tableName}] WHERE {idColumn} = @Id";
+            using var connection = _context.CreateConnection();
+            return await connection.ExecuteAsync(query, new { Id = id });
         }
 
 

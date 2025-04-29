@@ -1,0 +1,18 @@
+﻿@model AMS.Models.User
+
+<h1>Edit User Password</h1>
+
+<h4>Change the password for "@Model.Username"</h4>
+
+<form asp-area="Admin" asp-controller="User" asp-action="UpdatePassword" method="post">
+    <input type="hidden" name="id" value="@Model.UserId" />
+
+    <div class="form-group">
+        <label for="newPassword">New Password</label>
+        <input type="password" id="newPassword" name="newPassword" class="form-control" required />
+    </div>
+
+    <button type="submit" class="btn btn-success mt-3">Update Password</button>
+</form>
+
+<a asp-area="Admin" asp-controller="User" asp-action="Index" class="btn btn-secondary mt-3">Back To List</a>

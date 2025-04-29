@@ -36,40 +36,7 @@ namespace AMS.Areas.Admin.Controllers
             return View(new UserCreateViewModel());
         }
 
-        //[HttpPost]
-        //public async Task<IActionResult> Create(User user)
-        //{
-        //    try
-        //    {
-        //        if (!ModelState.IsValid)
-        //        {
-        //            TempData["ErrorMessage"] = "Please correct the errors.";
-        //            await LoadEmployeeList(excludeUsers: true);
-        //            return View(user);
-        //        }
-
-        //        var existingUser = await _userRepository.GetByUsernameAsync(user.Username);
-
-        //        if (existingUser != null)
-        //        {
-        //            // Username exists -> generate a new one
-        //            user.Username = await GenerateUniqueUsername(user.Username);
-        //        }
-
-        //        user.PasswordHash = HashPassword(user.PasswordHash);
-
-        //        await _userRepository.AddAsync(user);
-
-        //        TempData["SuccessMessage"] = "User created successfully!";
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        TempData["ErrorMessage"] = $"Error: {ex.Message}";
-        //        await LoadEmployeeList(excludeUsers: true);
-        //        return View(user);
-        //    }
-        //}
+  
 
 
         [HttpPost]
@@ -115,6 +82,102 @@ namespace AMS.Areas.Admin.Controllers
                 return View(model);
             }
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var idColumn = "UserID";
+            var user = await _userRepository.GetByIdAsync(idColumn, id);
+            Console.WriteLine(id);
+            if (user == null)
+                return NotFound();
+
+            return View(user); // This will return Delete.cshtml with the user model
+        }
+
+
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteConfirm(int id)
+        {
+            try
+            {
+                var idColumn = "UserID";
+                var user = await _userRepository.GetByIdAsync(idColumn, id);
+                Console.WriteLine(id);
+
+                if (user == null)
+                {
+                    TempData["ErrorMessage"] = "User not found.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                await _userRepository.DeleteAsync(idColumn,id);
+
+                TempData["SuccessMessage"] = "User deleted successfully.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Error: {ex.Message}";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+
+
+
+        // Get the edit password form for a specific user
+        [HttpGet]
+        public async Task<IActionResult> EditPassword(int id)
+        {
+            var idColumn = "UserID";
+            var user = await _userRepository.GetByIdAsync(idColumn, id);
+
+            if (user == null)
+            {
+                TempData["ErrorMessage"] = "User not found.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(user); // returns EditPassword.cshtml
+        }
+
+
+        // POST: Update the user's password
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdatePassword(int id, string newPassword)
+        {
+            try
+            {
+                var idColumn = "UserID";
+                var user = await _userRepository.GetByIdAsync(idColumn, id);
+
+                if (user == null)
+                {
+                    TempData["ErrorMessage"] = "User not found.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Hash the new password before saving
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+
+                // Update the password
+                await _userRepository.UpdateAsync(idColumn,user);
+
+                TempData["SuccessMessage"] = "Password updated successfully!";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Error: {ex.Message}";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+
+
 
 
         [HttpGet]

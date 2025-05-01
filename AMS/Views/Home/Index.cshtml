@@ -1,4 +1,4 @@
-﻿@model AMS.Models.User
+﻿@model AMS.Models.ViewModel.LoginVM
 
 @{
 	ViewData["Title"] = "Home Page";
@@ -17,7 +17,8 @@
 				{
 					<p style="color: red">@TempData["Error"]</p>
 				}
-				<form asp-area="Admin" asp-controller="Dashboard" asp-action="Login" method="post">
+					@* <form asp-area="Admin" asp-controller="Account" asp-action="Login" method="post"> *@
+				<form  asp-controller="Account" asp-action="Login" method="post">
 					<div class="mb-3">
 						<label asp-for="Role" class="form-label">Role</label>
 						<select class="form-select" asp-for="Role" required>

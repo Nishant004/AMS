@@ -76,26 +76,4 @@ namespace AMS.Repository
 
 
 
-//public async Task<int> DeleteAsync(int id)
-//{
-//    var query = $"UPDATE [{_tableName}] SET IsDelete = 1 WHERE Id = @Id";
-//    using var connection = _context.CreateConnection();
-//    return await connection.ExecuteAsync(query, new { Id = id });
-//}
-
-//public async Task<T?> GetByIdAsync(int id)
-//{
-//    var query = $"SELECT * FROM [{_tableName}] WHERE Id = @Id AND IsDelete = 0";
-//    using var connection = _context.CreateConnection();
-//    return await connection.QueryFirstOrDefaultAsync<T>(query, new { Id = id });
-//}
-
-//public async Task<User?> GetByUsernameAsync(string username)
-//{
-//    var query = $"SELECT * FROM [{_tableName}] WHERE Username = @Username AND IsDelete = 0";
-//    using var connection = _context.CreateConnection();
-//    return await connection.QueryFirstOrDefaultAsync<User>(query, new { Username = username });
-//}
-
-
 

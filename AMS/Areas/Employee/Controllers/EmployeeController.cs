@@ -1,4 +1,6 @@
-﻿using AMS.Interfaces;
+﻿using AMS.Filters;
+using AMS.Helpers;
+using AMS.Interfaces;
 using AMS.Models;
 using AMS.Models.ViewModel;
 using AMS.Repository;
@@ -8,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 namespace AMS.Areas.Employee.Controllers
 {
     [Area("Employee")]
+    [AuthGuard("Employee")]
     public class EmployeeController : Controller
     {
 
@@ -21,19 +24,28 @@ namespace AMS.Areas.Employee.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var employeeId = HttpContext.Session.GetInt32("EmployeeId");
-            if (employeeId == null)
+            //var employeeId = HttpContext.Session.GetInt32("EmployeeId");
+            //if (employeeId == null)
+            //{
+            //    return RedirectToAction("Index", "Home", new { area = "" });
+            //}
+
+            var userSession = SessionHelper.GetUserSession(HttpContext);
+            if (userSession == null || !userSession.Role.Equals("Employee", StringComparison.OrdinalIgnoreCase))
             {
                 return RedirectToAction("Index", "Home", new { area = "" });
             }
 
-            ViewBag.EmployeeId = employeeId.Value;
+
+
+
+            ViewBag.EmployeeId = userSession.EmployeeId;
 
 
             var today = DateTime.Today;
 
             var logs = await _employeeRepository.GetAttendanceLogsAsync(
-                employeeId.Value,
+                userSession.EmployeeId,
                 today.Year,
                 today.Month,
                 today.Day
@@ -58,9 +70,12 @@ namespace AMS.Areas.Employee.Controllers
 
 
             var forwardedIp = HttpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault();
+
             var ip = string.IsNullOrEmpty(forwardedIp)
                 ? HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString()
                 : forwardedIp;
+
+
 
             Console.WriteLine($"User IP: {ip}");
             //Console.WriteLine($"User IP: {HttpContext.Connection.RemoteIpAddress}");
@@ -203,13 +218,20 @@ namespace AMS.Areas.Employee.Controllers
         [HttpGet]
         public async Task<IActionResult> AttendanceLog(int year, int month, int day)
         {
-            var employeeId = HttpContext.Session.GetInt32("EmployeeId");
-            if (employeeId == null)
+            //var employeeId = HttpContext.Session.GetInt32("EmployeeId");
+            //if (employeeId == null)
+            //{
+            //    return Unauthorized();
+            //}
+
+            var userSession = SessionHelper.GetUserSession(HttpContext);
+            if (userSession == null || !userSession.Role.Equals("Employee", StringComparison.OrdinalIgnoreCase))
             {
                 return Unauthorized();
             }
 
-            var logs = await _employeeRepository.GetAttendanceLogsAsync(employeeId.Value, year, month, day);
+
+            var logs = await _employeeRepository.GetAttendanceLogsAsync(userSession.EmployeeId, year, month, day);
 
             return PartialView("_AttendanceLogRows", logs);
         }

@@ -26,7 +26,7 @@
             </ul>
 
             <ul class="navbar-nav ms-auto">
-                @if (Context.Session.GetInt32("EmployeeId") != null)
+                @if (Context.Session.GetInt32("User") != null)
                 {
                     <li class="nav-item">
                         <button id="logoutBtn" class="btn btn-danger me-3">Logout</button>

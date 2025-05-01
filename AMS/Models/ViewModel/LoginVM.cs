@@ -1,11 +1,18 @@
-﻿namespace AMS.Models.ViewModel
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace AMS.Models.ViewModel
 {
     public class LoginVM
     {
 
-        public string UserCode { get; set; }
-        public string Password { get; set; }
+        [Required]
+        public string Username { get; set; }
 
+        [Required]
+        [DataType(DataType.Password)]
+        public string PasswordHash { get; set; }
+
+        public string Role { get; set; } = null!;
 
     }
 }

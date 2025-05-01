@@ -14,7 +14,17 @@ public static class ServiceConfiguration
     {
 
         // SERVICES
-        services.AddSession();
+        //services.AddSession();
+
+        services.AddHttpContextAccessor(); // Must be added before AuthService
+        services.AddScoped<AuthService>();
+
+        services.AddSession(options =>
+        {
+            options.IdleTimeout = TimeSpan.FromMinutes(30);
+            options.Cookie.HttpOnly = true;
+            options.Cookie.IsEssential = true;
+        });
 
         // DinkToPdf
         //services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
@@ -22,6 +32,7 @@ public static class ServiceConfiguration
         services.AddScoped<PdfService>();
 
         services.AddScoped<IViewRenderService, ViewRenderService>();
+
 
 
         // DATA
@@ -33,6 +44,8 @@ public static class ServiceConfiguration
         services.AddScoped<IAdminRepository, AdminRepository>();
         services.AddScoped<IEmployeeRepository, EmployeeRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
+
+        
 
         return services;
     }

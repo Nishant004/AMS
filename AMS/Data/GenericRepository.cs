@@ -33,28 +33,16 @@ namespace AMS.Data
             else
             {
                 // Table has no 'IsDelete' => simple select
-                query = $"SELECT * FROM [{_tableName}] WHERE Role = 'employee'";
+
+
+                query = $"SELECT * FROM [{_tableName}] ";
+
+
                 //query = $"SELECT * FROM [{_tableName}]";
             }
 
             using var connection = _context.CreateConnection();
             return await connection.QueryAsync<T>(query);
-
-
-            //var query = $"SELECT * FROM {_tableName} WHERE IsDelete = 0";
-            //using var connection = _context.CreateConnection();
-
-            //return await connection.QueryAsync<T>(query);
-
-            //var result = await connection.QueryAsync<T>(query);
-
-            //// Log each object in the result
-            //foreach (var item in result)
-            //{
-            //    Console.WriteLine($"Returned object: {Newtonsoft.Json.JsonConvert.SerializeObject(item)}");
-            //}
-
-            //return result;
 
 
 

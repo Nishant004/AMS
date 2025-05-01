@@ -6,6 +6,7 @@ using AMS.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using AMS.Helpers;
 
 namespace AMS.Controllers
 {
@@ -20,12 +21,27 @@ namespace AMS.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var email = HttpContext.Session.GetString("UserSession");
 
-            if (string.IsNullOrEmpty(email))
+            var userSession = SessionHelper.GetUserSession(HttpContext);
+            if (userSession == null || !userSession.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
             {
-                return RedirectToAction("Login", "Dashboard");
+                return RedirectToAction("Index", "Home", new { area = "" });
             }
+
+
+            // You now have access to:
+            //var username = userSession.Name;
+
+            //Console.WriteLine("Logged in user: " + username);
+
+
+            //var email = HttpContext.Session.GetString("User");
+
+
+            //if (string.IsNullOrEmpty(email))
+            //{
+            //    return RedirectToAction("Login", "Dashboard");
+            //}
 
             var employee = await _adminRepository.GetAllAsync();
 
@@ -119,20 +135,3 @@ namespace AMS.Controllers
 }
 
 
-//public async Task<IActionResult> GetEmployeeAttendance(int employee, int month, int year)
-//{
-//    var employeeDetails = await _adminRepository.GetAllAsync();
-//    var attendanceRecords = await _adminRepository.GetAttendanceByMonthYearAsync(employee, month, year);
-
-//    var result = from record in attendanceRecords
-//                 join emp in employeeDetails on record.EmployeeID equals emp.EmployeeId
-//                 select new
-//                 {
-//                     record.EmployeeID,
-//                     EmployeeName = emp.FirstName + " " + emp.LastName,
-//                     record.AttendanceDate,
-//                     record.Status
-//                 };
-
-//    return new JsonResult(result);
-//}

@@ -44,28 +44,3 @@ public class Employees
 }
 
 
-//public partial class Employees
-//{
-//    public int EmployeeId { get; set; }
-
-//    public string FirstName { get; set; } = null!;
-
-//    public string LastName { get; set; } = null!;
-
-//    public string Email { get; set; } = null!;
-
-//    public string? PhoneNumber { get; set; }
-
-//    public string? Department { get; set; }
-
-//    public string? Designation { get; set; }
-
-//    public DateTime JoiningDate { get; set; }
-
-//    public string Status { get; set; } = null!;
-
-//    public string Project { get; set; } = "Not Assigned";
-
-//    public bool IsDelete { get; set; }
-
-//}

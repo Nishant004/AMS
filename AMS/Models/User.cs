@@ -10,7 +10,7 @@ public partial class User
     public int UserId { get; set; }
 
     [Required(ErrorMessage = "Employee is required")]
-    public int? EmployeeId { get; set; }
+    public int EmployeeId { get; set; }
 
     [Required(ErrorMessage = "Username is required")]
     [StringLength(50, ErrorMessage = "Username cannot exceed 50 characters")]

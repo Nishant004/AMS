@@ -10,9 +10,6 @@
         public string CheckOutTime { get; set; } = "Not Available";
         public string Status { get; set; } = "Not Available";
 
-        //public string Remarks { get; set; } = "Not Available";
-        //public string RemarksOut { get; set; } = "Not Available";
-
         public string FollowUpShift { get; set; } = "No";
 
 

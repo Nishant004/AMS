@@ -22,13 +22,6 @@ namespace AMS.Repository
         }
 
 
-
-
-
-
-
-
-
         public Task<Attendance?> GetAttendanceByEmployeeDateAsync(int employeeId, DateTime date)
         {
             return _employeeAttendance.GetAttendanceByEmployeeDateAsync(employeeId, date);
@@ -50,12 +43,6 @@ namespace AMS.Repository
             return _employeeAttendance.GetEmployeeAttendanceByDateAsync(employeeId);
         }
 
-
-
-        //public async Task<int> AddAttendanceAsync(Attendance attendance)
-        //{
-        //    return await _employeeAttendance.AddAttendanceAsync(attendance);
-        //}
 
         public Task<bool> CheckInAsync(int employeeId, string ip, double? checkInLat, double? checkInLong, string followUpShift)
         {

@@ -160,7 +160,7 @@ function sendAttendanceRequest(url, requestData) {
 // ✅ Logout Function
 function handleLogout() {
     $.ajax({
-        url: '/admin/dashboard/Logout',
+        url: '/account/Logout',
         method: 'POST',
         headers: {
             "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()

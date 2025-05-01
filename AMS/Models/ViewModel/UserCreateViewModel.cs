@@ -5,7 +5,7 @@ namespace AMS.Models.ViewModel
     public class UserCreateViewModel
     {
         [Required]
-        public int? EmployeeId { get; set; }
+        public int EmployeeId { get; set; }
 
         [Required]
         public string Username { get; set; }

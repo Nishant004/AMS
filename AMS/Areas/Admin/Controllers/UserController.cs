@@ -7,10 +7,13 @@ using System.Security.Cryptography;
 using System.Text;
 using BCrypt.Net;
 using AMS.Models.ViewModel;
+using AMS.Filters;
+using AMS.Helpers;
 
 namespace AMS.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [AuthGuard("Admin")]
     public class UserController : Controller
     {
         private readonly IUserRepository _userRepository;
@@ -25,14 +28,22 @@ namespace AMS.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var users = await _userRepository.GetAllAsync();
-            return View(users.OrderByDescending(u => u.UserId));
+
+            var employees = (await _userRepository.GetAllAsync())
+            .Where(e => e.Role.Equals("employee", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+
+            return View(employees.OrderByDescending(e => e.EmployeeId));
+
+           
         }
 
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            await LoadEmployeeList(excludeUsers: true);
+            //await LoadEmployeeList(excludeUsers: true);
+            await LoadEmployeeList();
             return View(new UserCreateViewModel());
         }
 
@@ -42,12 +53,20 @@ namespace AMS.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(UserCreateViewModel model)
         {
+
+            var userSession = SessionHelper.GetUserSession(HttpContext);
+            if (userSession == null || !userSession.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                return RedirectToAction("Index", "Home", new { area = "" });
+            }
+
             try
             {
                 if (!ModelState.IsValid)
                 {
                     TempData["ErrorMessage"] = "Please correct the errors.";
-                    await LoadEmployeeList(excludeUsers: true);
+                    await LoadEmployeeList();
+                    //await LoadEmployeeList(excludeUsers: true);
                     return View(model);
                 }
 
@@ -56,7 +75,8 @@ namespace AMS.Areas.Admin.Controllers
                 if (existingUser != null)
                 {
                     TempData["ErrorMessage"] = $"Username '{model.Username}' already exists.";
-                    await LoadEmployeeList(excludeUsers: true);
+                    //await LoadEmployeeList(excludeUsers: true);
+                    await LoadEmployeeList();
                     return View(model);
                 }
 
@@ -78,7 +98,8 @@ namespace AMS.Areas.Admin.Controllers
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = $"Error: {ex.Message}";
-                await LoadEmployeeList(excludeUsers: true);
+                //await LoadEmployeeList(excludeUsers: true);
+                await LoadEmployeeList();
                 return View(model);
             }
         }
@@ -86,6 +107,8 @@ namespace AMS.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
+
+
             var idColumn = "UserID";
             var user = await _userRepository.GetByIdAsync(idColumn, id);
             Console.WriteLine(id);
@@ -100,6 +123,14 @@ namespace AMS.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> DeleteConfirm(int id)
         {
+
+            var userSession = SessionHelper.GetUserSession(HttpContext);
+            if (userSession == null || !userSession.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                return RedirectToAction("Index", "Home", new { area = "" });
+            }
+
+
             try
             {
                 var idColumn = "UserID";
@@ -149,6 +180,14 @@ namespace AMS.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdatePassword(int id, string newPassword)
         {
+
+            var userSession = SessionHelper.GetUserSession(HttpContext);
+            if (userSession == null || !userSession.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                return RedirectToAction("Index", "Home", new { area = "" });
+            }
+
+
             try
             {
                 var idColumn = "UserID";
@@ -223,32 +262,62 @@ namespace AMS.Areas.Admin.Controllers
             return newUsername;
         }
 
-
-        private async Task LoadEmployeeList(bool excludeUsers = false)
+        private async Task LoadEmployeeList()
         {
-            IEnumerable<Employees> employees;
+            // Step 1: Get all active employees
+            var allEmployees = (await _employeeRepository.GetAllAsync())
+                .Where(e => e.Status.Equals("Active", StringComparison.OrdinalIgnoreCase))
+                .ToList();
 
-            if (excludeUsers)
-            {
-                // Get employees who are not already assigned to a user
-                var userEmployeeIds = (await _userRepository.GetAllAsync())
-                    .Where(u => u.EmployeeId.HasValue)
-                    .Select(u => u.EmployeeId.Value)
-                    .ToList();
+            // Step 2: Get users who are either 'employee' or 'admin'
+            var userEmployeeIds = (await _userRepository.GetAllAsync())
+                .Where(u =>
+                    u.Role.Equals("employee", StringComparison.OrdinalIgnoreCase) || 
+                    u.Role.Equals("admin", StringComparison.OrdinalIgnoreCase))
+                .Select(u => u.EmployeeId)
+                .ToHashSet(); // HashSet for fast lookup
 
-                employees = await _employeeRepository.GetAllAsync();
+            // Step 3: Exclude all those EmployeeIds from employees
+            var availableEmployees = allEmployees
+                .Where(e => !userEmployeeIds.Contains(e.EmployeeId))
+                .ToList();
 
-                // Filter out employees that are already in the User table
-                employees = employees.Where(e => !userEmployeeIds.Contains(e.EmployeeId)).ToList();
-            }
-            else
-            {
-                // Get all employees without filtering
-                employees = await _employeeRepository.GetAllAsync();
-            }
-
-            ViewBag.EmployeeList = new SelectList(employees, "EmployeeId", "FirstName");
+            // Step 4: Bind to dropdown
+            ViewBag.EmployeeList = new SelectList(
+                availableEmployees.Select(e => new {
+                    e.EmployeeId,
+                    FullName = e.FirstName + " " + e.LastName
+                }),
+                "EmployeeId", "FullName"
+            );
         }
+
+
+
+        //private async Task LoadEmployeeList(bool excludeUsers = false)
+        //{
+        //    IEnumerable<Employees> employees;
+
+        //    if (excludeUsers)
+        //    {
+        //        // Get employees who are not already assigned to a user
+        //        var userEmployeeIds = (await _userRepository.GetAllAsync())
+        //             .Select(u => u.EmployeeId)
+        //             .ToList();
+
+        //        employees = await _employeeRepository.GetAllAsync();
+
+        //        // Filter out employees that are already in the User table
+        //        employees = employees.Where(e => !userEmployeeIds.Contains(e.EmployeeId)).ToList();
+        //    }
+        //    else
+        //    {
+        //        // Get all employees without filtering
+        //        employees = await _employeeRepository.GetAllAsync();
+        //    }
+
+        //    ViewBag.EmployeeList = new SelectList(employees, "EmployeeId", "FirstName");
+        //}
 
     }
 }

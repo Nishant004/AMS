@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using AMS.Models;
+using AMS.Helpers;
 
 namespace AMS.Controllers;
 
@@ -9,15 +10,27 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-        if (HttpContext.Session.GetString("UserSession") != null)
+
+        var userSession = SessionHelper.GetUserSession(HttpContext);
+        if (userSession == null)
         {
-            return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
+            return View();
         }
-        if (HttpContext.Session.GetString("EmployeeSession") != null)
+
+        if (userSession.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+        {
+            return RedirectToAction("Index", "Attendance", new { area = "" });
+        }
+        else if (userSession.Role.Equals("Employee", StringComparison.OrdinalIgnoreCase))
         {
             return RedirectToAction("Index", "Employee", new { area = "Employee" });
         }
+
+        // Fallback: unknown role
+        TempData["Error"] = "Unauthorized role access.";
         return View();
+
+
     }
 
     public IActionResult Privacy()

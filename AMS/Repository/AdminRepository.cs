@@ -22,17 +22,6 @@ namespace AMS.Repository
             _user = user;
         }
 
-        // ✅ Implement login method
-        //public Task<Admin> GetByCredentialsAsync(string usernameColumn, string passwordColumn, string username, string password)
-        //{
-        //    return _adminGenRepository.GetByCredentialsAsync(usernameColumn, passwordColumn, username, password);
-        //}
-
-        // ✅ New Implement login method
-        //Task<User> IAdminRepository.GetByUserCredentialsAsync(string usernameColumn, string passwordColumn, string roleColumn, string username, string password, string role)
-        //{
-        //    return _user.GetByUserCredentialsAsync(usernameColumn, passwordColumn, roleColumn, username, password, role);
-        //}
 
    
         public Task<(User? user, bool isDeactivated)> GetByUserCredentialsAsync(

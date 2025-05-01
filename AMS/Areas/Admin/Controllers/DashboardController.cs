@@ -9,10 +9,13 @@ using Microsoft.AspNetCore.Mvc;
 using AMS.Services;
 using AMS.Helpers;
 using QuestPDF.Fluent;
+using AMS.Models.ServiceModels;
+using AMS.Filters;
 
 namespace AMS.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [AuthGuard("Admin")]
     public class DashboardController : Controller
     {
         private readonly IAdminRepository _adminRepository;
@@ -30,185 +33,22 @@ namespace AMS.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var email = HttpContext.Session.GetString("UserSession");
-
-            if (string.IsNullOrEmpty(email))
-            {
-                return RedirectToAction("Index", "Home", new { area = "" });
-            }
-
             var employee = await _adminRepository.GetAllAsync();
-
             return View(employee);
-
         }
-
-        //------------------------------------OLD LOGIN-----------------------------------------------//
-        //public IActionResult Login()
-        //{
-        //    Console.WriteLine("Login called");
-        //    if (HttpContext.Session.GetString("UserSession") != null)
-        //    {
-        //        return RedirectToAction("Index", "Dashboard");
-        //    }
-        //    return View();
-        //}
-
-        //[HttpPost]
-        //public async Task<IActionResult> Login(Models.Admin admin)
-        //{
-        //    Console.WriteLine("joker");
-        //    Console.WriteLine(admin.Email);
-        //    Console.WriteLine(admin.Password);
-        //    // Replace these with your actual column names from the database
-        //    string usernameColumn = "Email";
-        //    string passwordColumn = "Password";
-
-        //    var myAdmin = await _adminRepository.GetByCredentialsAsync(usernameColumn, passwordColumn, admin.Email, admin.Password);
-
-        //    Console.WriteLine("show it: " + JsonSerializer.Serialize(myAdmin));
-
-
-        //    if (myAdmin != null)
-        //    {
-        //        HttpContext.Session.SetString("UserSession", myAdmin.Email);
-        //        //HttpContext.Session.SetString("UserImage", myAdmin.Image ?? "default-profile.jpg");
-        //        return RedirectToAction("Index", "Dashboard");
-        //    }
-        //    else
-        //    {
-        //        ViewBag.Message = "Login Failed...";
-        //    }
-        //    return View();
-        //}
-        //------------------------------------OLD LOGIN-----------------------------------------------//
-
-
-
-        //[HttpPost]
-        //public async Task<IActionResult> Login(User user)
-        //{
-        //    Console.WriteLine(user.Username);
-        //    Console.WriteLine(user.PasswordHash);
-        //    // Replace these with your actual column names from the database
-        //    string usernameColumn = "Username";
-        //    string passwordColumn = "PasswordHash";
-        //    string roleColumn = "Role";
-
-        //    //var (myAdmin, isDeactivated) = await _adminRepository.GetByUserCredentialsAsync(usernameColumn, passwordColumn, roleColumn, user.Username, user.PasswordHash, user.Role);
-
-        //        var (myAdmin, isDeactivated) =  await _adminRepository.GetByUserCredentialsAsync(
-        //    "Username", "PasswordHash", "Role", user.Username, user.PasswordHash, user.Role);
-
-
-        //    Console.WriteLine("show it: " + JsonSerializer.Serialize(myAdmin));
-
-        //    if (myAdmin != null)
-        //    {
-        //        if (myAdmin.Role == "Admin" || myAdmin.Role == "admin")
-        //        {
-        //            HttpContext.Session.SetString("UserSession", myAdmin.Username);
-        //            //HttpContext.Session.SetString("UserImage", myAdmin.Image ?? "default-profile.jpg");
-        //            return RedirectToAction("Index", "Attendance", new { area = ""});
-        //        }
-        //        else if (myAdmin.Role == "Employee" || myAdmin.Role == "employee")
-        //        {
-        //            HttpContext.Session.SetInt32("EmployeeId", myAdmin.EmployeeId.Value);
-        //            //HttpContext.Session.SetString("UserImage", myAdmin.Image ?? "default-profile.jpg");
-        //            return RedirectToAction("Index", "Employee", new { area = "Employee" });
-        //        }
-        //        else
-        //        {
-        //            TempData["Error"] = "Login Failed...";
-        //        }
-        //    }
-        //    else
-        //    {
-        //        TempData["Error"] = "Login Failed...";
-        //    }
-
-        //    return RedirectToAction("Index", "Home", new { area = "" });
-        //}
-
-        //public IActionResult Create()
-        //{
-        //    var email = HttpContext.Session.GetString("UserSession");
-
-        //    if (string.IsNullOrEmpty(email))
-        //    {
-        //        return RedirectToAction("Index", "Home", new { area = "" });
-        //    }
-
-        //    return View();
-        //}
-
-
-
-
-        [HttpPost]
-        public async Task<IActionResult> Login(User user)
-        {
-            Console.WriteLine(user.Username);
-            Console.WriteLine(user.PasswordHash);
-            // Replace these with your actual column names from the database
-            string usernameColumn = "Username";
-            string passwordColumn = "PasswordHash";
-            string roleColumn = "Role";
-
-            var (myAdmin, isDeactivated) = await _adminRepository.GetByUserCredentialsAsync(
-                usernameColumn, passwordColumn, roleColumn, user.Username, user.PasswordHash, user.Role
-            );
-
-            Console.WriteLine("show it: " + JsonSerializer.Serialize(myAdmin));
-
-          
-
-            if (myAdmin != null)
-            {
-                
-
-                if (myAdmin.Role == "Admin" || myAdmin.Role == "admin")
-                {
-                    HttpContext.Session.SetString("UserSession", myAdmin.Username);
-                    return RedirectToAction("Index", "Attendance", new { area = "" });
-                }
-                else if (myAdmin.Role == "Employee" || myAdmin.Role == "employee")
-                {
-                    HttpContext.Session.SetInt32("EmployeeId", myAdmin.EmployeeId.Value);
-                    return RedirectToAction("Index", "Employee", new { area = "Employee" });
-                }
-                else
-                {
-                    TempData["Error"] = "Login Failed...";
-                }
-            }
-            else
-            {
-                
-                if (isDeactivated) // Check if user is deactivated
-                {
-                    TempData["Error"] = "Your account is deactivated. Please contact the administrator.";
-                    return RedirectToAction("Index", "Home", new { area = "" });
-                }
-                else { TempData["Error"] = "Login Failed..."; }
-            }
-
-            return RedirectToAction("Index", "Home", new { area = "" });
-        }
-
-
 
 
 
 
         public IActionResult Create()
         {
-            var email = HttpContext.Session.GetString("UserSession");
 
-            if (string.IsNullOrEmpty(email))
+            var userSession = SessionHelper.GetUserSession(HttpContext);
+            if (userSession == null || !userSession.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
             {
                 return RedirectToAction("Index", "Home", new { area = "" });
             }
+
 
             return View();
         }
@@ -219,12 +59,21 @@ namespace AMS.Areas.Admin.Controllers
         public async Task<IActionResult> Create([Bind("FirstName, LastName, Email, PhoneNumber, Department, Designation, JoiningDate, Status,Project")] Employees employee)
         {
             Console.WriteLine("Create Post called");
-            var email = HttpContext.Session.GetString("UserSession");
 
-            if (string.IsNullOrEmpty(email))
+
+            //var email = HttpContext.Session.GetString("UserSession");
+
+            //if (string.IsNullOrEmpty(email))
+            //{
+            //    return RedirectToAction("Index", "Home", new { area = "" });
+            //}
+
+            var userSession = SessionHelper.GetUserSession(HttpContext);
+            if (userSession == null || !userSession.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
             {
                 return RedirectToAction("Index", "Home", new { area = "" });
             }
+
 
             if (ModelState.IsValid)
             {
@@ -264,14 +113,21 @@ namespace AMS.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            Console.WriteLine("Edit: Get");
+            //Console.WriteLine("Edit: Get");
 
-            var email = HttpContext.Session.GetString("UserSession");
+            //var email = HttpContext.Session.GetString("UserSession");
 
-            if (string.IsNullOrEmpty(email))
+            //if (string.IsNullOrEmpty(email))
+            //{
+            //    return RedirectToAction("Index", "Home", new { area = "" });
+            //}
+
+            var userSession = SessionHelper.GetUserSession(HttpContext);
+            if (userSession == null || !userSession.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
             {
                 return RedirectToAction("Index", "Home", new { area = "" });
             }
+
 
             string idColumn = "EmployeeId";
             var employee = await _adminRepository.GetByIdAsync(idColumn, id);
@@ -289,12 +145,19 @@ namespace AMS.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit([Bind("EmployeeId, FirstName, LastName, Email, PhoneNumber, Department, Designation, JoiningDate, Status,Project")] Employees employee)
         {
-            var email = HttpContext.Session.GetString("UserSession"); // Use logged-in user's email
+            //var email = HttpContext.Session.GetString("UserSession"); // Use logged-in user's email
 
-            if (string.IsNullOrEmpty(email))
+            //if (string.IsNullOrEmpty(email))
+            //{
+            //    return RedirectToAction("Index", "Home", new { area = "" }); // Redirect if not logged in
+            //}
+
+            var userSession = SessionHelper.GetUserSession(HttpContext);
+            if (userSession == null || !userSession.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
             {
-                return RedirectToAction("Index", "Home", new { area = "" }); // Redirect if not logged in
+                return RedirectToAction("Index", "Home", new { area = "" });
             }
+
 
             if (ModelState.IsValid)
             {
@@ -342,12 +205,19 @@ namespace AMS.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
-            var email = HttpContext.Session.GetString("UserSession");
+            //var email = HttpContext.Session.GetString("UserSession");
 
-            if (string.IsNullOrEmpty(email))
+            //if (string.IsNullOrEmpty(email))
+            //{
+            //    return RedirectToAction("Index", "Home", new { area = "" });
+            //}
+
+            var userSession = SessionHelper.GetUserSession(HttpContext);
+            if (userSession == null || !userSession.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
             {
                 return RedirectToAction("Index", "Home", new { area = "" });
             }
+
 
             string idColumn = "EmployeeId";
             var existingEmployee = await _adminRepository.GetByIdAsync(idColumn, id);
@@ -367,12 +237,21 @@ namespace AMS.Areas.Admin.Controllers
         {
             Console.WriteLine("ConfirmDelete Called");
 
-            var email = HttpContext.Session.GetString("UserSession");
+            //var email = HttpContext.Session.GetString("UserSession");
 
-            if (string.IsNullOrEmpty(email))
+            //if (string.IsNullOrEmpty(email))
+            //{
+            //    return RedirectToAction("Index", "Home", new { area = "" });
+            //}
+
+            var userSession = SessionHelper.GetUserSession(HttpContext);
+            if (userSession == null || !userSession.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
             {
                 return RedirectToAction("Index", "Home", new { area = "" });
             }
+
+
+
 
             string idColumn = "EmployeeId";
             var existingEmployee = await _adminRepository.GetByIdAsync(idColumn, EmployeeId);
@@ -401,12 +280,19 @@ namespace AMS.Areas.Admin.Controllers
 
         public async Task<IActionResult> EmployeeDetails(int id)
         {
-            var email = HttpContext.Session.GetString("UserSession");
+            //var email = HttpContext.Session.GetString("UserSession");
 
-            if (string.IsNullOrEmpty(email))
+            //if (string.IsNullOrEmpty(email))
+            //{
+            //    return RedirectToAction("Index", "Home", new { area = "" });
+            //}
+
+            var userSession = SessionHelper.GetUserSession(HttpContext);
+            if (userSession == null || !userSession.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
             {
                 return RedirectToAction("Index", "Home", new { area = "" });
             }
+
 
             string idColumn = "EmployeeId";
 
@@ -492,19 +378,7 @@ namespace AMS.Areas.Admin.Controllers
 
         }
 
-        public IActionResult Logout()
-        {
-
-            if (!string.IsNullOrEmpty(HttpContext.Session.GetString("UserSession")))
-            {
-                //HttpContext.Session.Remove("UserSession");
-                //HttpContext.Session.Remove("UserImage");
-                HttpContext.Session.Clear();
-                return RedirectToAction("Index", "Home", new { area = "" });
-            }
-            return RedirectToAction("Index", "Home", new { area = "" });
-        }
-
+      
 
 
         public IActionResult Test()

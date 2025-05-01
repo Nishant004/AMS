@@ -39,10 +39,7 @@
                 <td>@user.Username</td>
                 <td>@user.Role</td>
                 <td class="text-center">
-                  @*   <a class="btn btn-sm btn-outline-primary me-1" title="Edit"
-                       asp-area="Admin" asp-controller="User" asp-action="Edit" asp-route-id="@user.UserId">
-                        ✏️ Edit
-                    </a> *@
+              
                     <a class="btn btn-sm btn-outline-warning me-1" title="Change Password"
                        asp-area="Admin" asp-controller="User" asp-action="EditPassword" asp-route-id="@user.UserId">
                         🔐 Password

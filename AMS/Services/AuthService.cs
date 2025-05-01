@@ -1,34 +1,36 @@
-﻿//using Newtonsoft.Json;
-//using CRM.Data;
-//using CRM.Models.ServiceModels;
-//using System.Security.Claims;
+﻿using System.Text.Json;
+using AMS.Models.ServiceModels;
 
-//namespace CRM.Services
-//{
-//    public class AuthService
-//    {
-//        private readonly IHttpContextAccessor _httpContextAccessor;
+public class AuthService
+{
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-//        public AuthService(IHttpContextAccessor httpContextAccessor)
-//        {
-//            _httpContextAccessor = httpContextAccessor;
-//        }
+    public AuthService(IHttpContextAccessor httpContextAccessor)
+    {
+        _httpContextAccessor = httpContextAccessor;
+    }
 
-//        public async Task LoginAsync(AuthSession session)
-//        {
-//            var claims = new List<Claim>
-//            {
-//                new Claim(ClaimTypes.Name, session.Name),
-//                new Claim(ClaimTypes.Role, session.Role)
-//            };
+    public Task LoginAsync(AuthSession session)
+    {
+        var sessionJson = JsonSerializer.Serialize(session);
+        _httpContextAccessor.HttpContext.Session.SetString("User", sessionJson);
+        return Task.CompletedTask;
+    }
 
-//            _httpContextAccessor.HttpContext.Session.SetString("User", JsonConvert.SerializeObject(session));
-//        }
+    public Task LogoutAsync()
+    {
+        _httpContextAccessor.HttpContext.Session.Clear();
+        return Task.CompletedTask;
+    }
 
-//        public Task LogoutAsync()
-//        {
-//            _httpContextAccessor.HttpContext.Session.Clear();
-//            return Task.CompletedTask;
-//        }
-//    }
-//}
+    public AuthSession? GetCurrentUser()
+    {
+        var json = _httpContextAccessor.HttpContext.Session.GetString("User");
+        return string.IsNullOrEmpty(json) ? null : JsonSerializer.Deserialize<AuthSession>(json);
+    }
+}
+
+
+
+
+

@@ -4,6 +4,7 @@ using System.Text;
 using System.Reflection;
 using AMS.Models;
 using AMS.Models.ViewModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace AMS.Data
 
@@ -63,9 +64,20 @@ namespace AMS.Data
 
         public async Task<int> InsertAsync(T entity)
         {
+            //var props = typeof(T).GetProperties()
+            //    .Where(p => !(p.Name.ToLower().EndsWith("id") && p.PropertyType == typeof(int))) // Exclude identity column
+            //    .ToList();
+
             var props = typeof(T).GetProperties()
-                .Where(p => !(p.Name.ToLower().EndsWith("id") && p.PropertyType == typeof(int))) // Exclude identity column
-                .ToList();
+            .Where(p => !string.Equals(p.Name, "UserId", StringComparison.OrdinalIgnoreCase)) // or "UserId"
+            .ToList();
+
+
+            //        var props = typeof(T).GetProperties()
+            //.Where(p => !Attribute.IsDefined(p, typeof(KeyAttribute)))
+            //.ToList();
+
+
 
             var columnNames = string.Join(", ", props.Select(p => p.Name));
             var paramNames = string.Join(", ", props.Select(p => "@" + p.Name));

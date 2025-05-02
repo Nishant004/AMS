@@ -80,15 +80,19 @@ namespace AMS.Areas.Admin.Controllers
                     return View(model);
                 }
 
+                Console.WriteLine($"EmployeeId: {model.EmployeeId}");
+
                 var user = new User
                 {
-                    EmployeeId = model.EmployeeId,
+                    
                     Username = model.Username,
+                    EmployeeId = model.EmployeeId,
                     Role = "employee",
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password)
                 };
 
                 var userdetails= await _userRepository.AddAsync(user);
+
 
                 Console.WriteLine($"User:{userdetails}");
 

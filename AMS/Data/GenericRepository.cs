@@ -5,6 +5,7 @@ using System.Reflection;
 using AMS.Models;
 using AMS.Models.ViewModel;
 using System.ComponentModel.DataAnnotations;
+using NuGet.Protocol.Core.Types;
 
 namespace AMS.Data
 
@@ -68,14 +69,31 @@ namespace AMS.Data
             //    .Where(p => !(p.Name.ToLower().EndsWith("id") && p.PropertyType == typeof(int))) // Exclude identity column
             //    .ToList();
 
-            var props = typeof(T).GetProperties()
-            .Where(p => !string.Equals(p.Name, "UserId", StringComparison.OrdinalIgnoreCase)) // or "UserId"
-            .ToList();
+            //var props = typeof(T).GetProperties()
+            //.Where(p => !string.Equals(p.Name, "UserId", StringComparison.OrdinalIgnoreCase)) // or "UserId"
+            //.ToList();
 
 
-            //        var props = typeof(T).GetProperties()
+            //var props = typeof(T).GetProperties()
             //.Where(p => !Attribute.IsDefined(p, typeof(KeyAttribute)))
             //.ToList();
+
+
+            //var identityProps = new[] { "UserId", "QuotaID", "SomeOtherId" }; // update as needed
+
+            //return typeof(T).GetProperties()
+            //    .Where(p => !identityProps.Contains(p.Name, StringComparer.OrdinalIgnoreCase))
+            //    .ToList();
+
+            var identityProp = typeof(T).GetProperties()
+               .FirstOrDefault(p =>
+                   (p.Name.EndsWith("Id", StringComparison.OrdinalIgnoreCase) &&
+                    p.PropertyType == typeof(int)));
+
+            // Exclude the identity property from insert
+            var props = typeof(T).GetProperties()
+                .Where(p => identityProp == null || p.Name != identityProp.Name)
+                .ToList();
 
 
 
@@ -89,51 +107,6 @@ namespace AMS.Data
 
             return insertedId;
         }
-
-
-        //public async Task<int> InsertAsync(T entity)
-        //{
-
-
-        //    var props = typeof(T).GetProperties()
-        //        .Where(p =>
-        //            !(p.Name.ToLower().EndsWith("id") && p.PropertyType == typeof(int)) // Exclude identity column
-        //        )
-        //        .ToList();
-        //    var columnNames = string.Join(", ", props.Select(p => p.Name));
-        //    var paramNames = string.Join(", ", props.Select(p => "@" + p.Name));
-        //    var query = $"INSERT INTO {_tableName} ({columnNames}) VALUES ({paramNames})";
-
-        //    using var connection = _context.CreateConnection();
-        //    return await connection.ExecuteAsync(query, entity);
-        //}
-
-        //var props = typeof(T).GetProperties()
-        //    .Where(p =>
-        //    {
-        //        var attr = p.GetCustomAttributes(true);
-        //        return !attr.Any(a =>
-        //            a is System.ComponentModel.DataAnnotations.KeyAttribute ||
-        //            (a is System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedAttribute dg && dg.DatabaseGeneratedOption == System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.Identity)
-        //        );
-        //    })
-        //    .ToList();
-
-
-
-
-
-
-        //public async Task<int> AddAsync(T entity)
-        //{
-        //    var properties = typeof(T).GetProperties().Where(p => p.CanWrite);
-        //    var columnNames = string.Join(", ", properties.Select(p => p.Name));
-        //    var parameterNames = string.Join(", ", properties.Select(p => "@" + p.Name));
-
-        //    var query = $"INSERT INTO [{_tableName}] ({columnNames}) VALUES ({parameterNames})";
-        //    using var connection = _context.CreateConnection();
-        //    return await connection.ExecuteAsync(query, entity);
-        //}
 
 
 
@@ -594,12 +567,59 @@ namespace AMS.Data
             return await connection.QueryFirstOrDefaultAsync<T>(query, new { Username = username });
         }
 
-     
+
+
+
+        public async Task<IEnumerable<T>> GetLeavesByEmployeeAndMonthAsync(int employeeId, int year)
+        {
+            string query = $@"
+        SELECT * FROM [{_tableName}]
+        WHERE EmployeeId = @EmployeeId
+        AND YEAR(StartDate) = @Year";
+
+            using var connection = _context.CreateConnection();
+            return await connection.QueryAsync<T>(query, new { EmployeeId = employeeId, Year = year });
+        }
+
+
+
+
+
+
+        public async Task<int> CreateLeaveRequestAsync(T entity)
+
+        {
+
+
+            string query = $@"
+        INSERT INTO [{_tableName}] (EmployeeId, LeaveType, StartDate, EndDate, Reason, Status, RequestedAt)
+        VALUES (@EmployeeId, @LeaveType, @StartDate, @EndDate, @Reason, @Status, @RequestedAt);
+        SELECT CAST(SCOPE_IDENTITY() as int);";
+
+            using var connection = _context.CreateConnection();
+            var leaveId = await connection.ExecuteScalarAsync<int>(query, entity);
+            return leaveId;
+
+
+
+        }
+
+
+
+        public async Task<T?> GetByEmployeeAndYearAsync(int employeeId, int year)
+        {
+            var query = $@"SELECT * FROM [{_tableName}] WHERE EmployeeID = @EmployeeID AND Year = @Year";
+            using var connection = _context.CreateConnection();
+            return await connection.QuerySingleOrDefaultAsync<T>(query, new { EmployeeID = employeeId, Year = year });
+        }
+
+
+
     }
-
-
-
-
-
-
 }
+
+
+
+
+
+

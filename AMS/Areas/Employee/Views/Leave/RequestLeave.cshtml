@@ -1,0 +1,57 @@
+﻿@model AMS.Models.LeaveRequests
+
+@{
+    ViewData["Title"] = "Request Leave";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm rounded-4 border-0">
+                <div class="card-body p-5">
+                    <h2 class="mb-4 text-center fw-bold">📝 Request Leave</h2>
+
+                    <form asp-action="RequestLeave" method="post" novalidate>
+                        <input asp-for="EmployeeId" type="hidden" />
+
+                        <div class="mb-3">
+                            <label asp-for="LeaveType" class="form-label">Leave Type</label>
+                            <select asp-for="LeaveType" class="form-select">
+                                <option value="">-- Select Leave Type --</option>
+                                <option value="Sick Leave">Sick Leave</option>
+                                <option value="Casual Leave">Casual Leave</option>
+                                <option value="Paid Leave">Paid Leave</option>
+                                <option value="Unpaid Leave">Unpaid Leave</option>
+                            </select>
+                            <span asp-validation-for="LeaveType" class="text-danger small"></span>
+                        </div>
+
+
+                        <div class="mb-3">
+                            <label asp-for="StartDate" class="form-label">Start Date</label>
+                            <input asp-for="StartDate" class="form-control" type="date" />
+                            <span asp-validation-for="StartDate" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="EndDate" class="form-label">End Date</label>
+                            <input asp-for="EndDate" class="form-control" type="date" />
+                            <span asp-validation-for="EndDate" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Reason" class="form-label">Reason</label>
+                            <textarea asp-for="Reason" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Reason" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-outline-secondary px-4">⬅️ Back</a>
+                            <button type="submit" class="btn btn-primary px-5 shadow">Submit 📨</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

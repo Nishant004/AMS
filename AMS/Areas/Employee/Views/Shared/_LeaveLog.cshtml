@@ -1,0 +1,24 @@
+﻿@* @model IEnumerable<AMS.Models.LeaveRequests>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Leave Type</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var leave in Model)
+            {
+                <tr>
+                    <td>@leave.LeaveType</td>
+                    <td>@leave.StartDate.ToShortDateString()</td>
+                    <td>@leave.EndDate.ToShortDateString()</td>
+                    <td>@leave.Status</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+ *@

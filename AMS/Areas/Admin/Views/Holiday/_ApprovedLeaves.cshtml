@@ -1,0 +1,76 @@
+﻿@model IEnumerable<AMS.Models.LeaveRequests>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No pending leave requests.</div>
+}
+else
+{
+    <table class="table table-bordered table-striped">
+        <thead class="table-warning">
+            <tr>
+                <th>Employee ID</th>
+                <th>Leave Type</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Reason</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var leave in Model)
+            {
+                <tr>
+                    <td>@leave.EmployeeId</td>
+                    <td>@leave.LeaveType</td>
+                    <td>@leave.StartDate?.ToShortDateString()</td>
+                    <td>@leave.EndDate?.ToShortDateString()</td>
+                    <td>@leave.Reason</td>
+                    <td>
+                      @leave.Status
+                  
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+
+@* @model IEnumerable<AMS.Models.LeaveRequests>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No approved leave records.</div>
+}
+else
+{
+    <table class="table table-bordered table-success">
+        <thead class="table-success">
+            <tr>
+                <th>Leave ID</th>
+                <th>Employee ID</th>
+                <th>Leave Type</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Reason</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var leave in Model)
+            {
+                <tr>
+                    <td>@leave.LeaveId</td>
+                    <td>@leave.EmployeeId</td>
+                    <td>@leave.LeaveType</td>
+                    <td>@leave.StartDate?.ToShortDateString()</td>
+                    <td>@leave.EndDate?.ToShortDateString()</td>
+                    <td>@leave.Reason</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+ *@

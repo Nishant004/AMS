@@ -1,0 +1,78 @@
+﻿@model List<AMS.Models.ViewModel.EmployeeQuotaDisplayVM>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No holiday quotas found for the selected year.</div>
+}
+else
+{
+    <table class="table table-bordered table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>Employee ID</th>
+                <th>Name</th>
+                <th>Year</th>
+                <th>Total Holidays</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.EmployeeID</td>
+                    <td>@item.FullName</td>
+                    <td>@item.Year</td>
+                    <td>@item.TotalHolidays</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@* <div class="card p-3 mb-4">
+    <h5>View Quota for Year</h5>
+    <div class="d-flex align-items-center gap-2 mb-2">
+        <input type="number" id="quotaViewYear" class="form-control" value="@DateTime.Now.Year" style="max-width: 200px;" />
+        <button class="btn btn-secondary" onclick="loadQuotaTable()">Load Quotas</button>
+    </div>
+
+    <!-- Display Quota Table -->
+    <div id="quotaTableContainer"></div>
+</div>
+ *@
+
+
+
+
+@* @model IEnumerable<AMS.Models.EmployeeHolidayQuota> *@
+
+@* @model IEnumerable<AMS.Models.ViewModel.HolidayLeaveVM>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No holiday quotas found for the selected year.</div>
+}
+else
+{
+    <table class="table table-bordered table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>Employee ID</th>
+                <th>Year</th>
+                <th>Total Holidays</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var quota in Model)
+            {
+                <tr>
+                    <td>@quota.EmployeeID</td>
+                    <td>@quota.Year</td>
+                    <td>@quota.TotalHolidays</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+ *@

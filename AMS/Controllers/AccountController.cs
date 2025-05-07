@@ -12,11 +12,13 @@ namespace AMS.Controllers
     {
         private readonly IUserRepository _userRepository;
         private readonly AuthService _authService;
+        private readonly IEmployeeRepository _employeeRepository;
 
-        public AccountController(IUserRepository userRepository, AuthService authService)
+        public AccountController(IUserRepository userRepository, AuthService authService,IEmployeeRepository employeeRepository)
         {
             _userRepository = userRepository;
             _authService = authService;
+            _employeeRepository = employeeRepository;
         }
 
      
@@ -32,12 +34,33 @@ namespace AMS.Controllers
                 // 1. Get user from DB
                 var user = await _userRepository.GetByUsernameAsync(model.Username);
 
+                if (user == null)
+                {
+                    TempData["Error"] = "Invalid username";
+                    return RedirectToAction("Index", "Home", new { area = "" });
+                }
+
+                Console.WriteLine($"User found: {user.EmployeeId}");
+
+                int id = user.EmployeeId;
+                string idColumn = "EmployeeId";
+                var checkActive = await _employeeRepository.GetByIdAsync(idColumn,id);
+
+                Console.WriteLine($"Empl found: {checkActive?.Status}");
+
+
+                if (checkActive?.Status == "Inactive")
+                {
+                    TempData["Error"] = "Your account is deactivated. Please contact the administrator.";
+                    return RedirectToAction("Index", "Home", new { area = "" });
+                }
+
 
                 //Role check
 
                 //if (!string.Equals(user.Role, model.Role, StringComparison.OrdinalIgnoreCase))
 
-                    if (!user.Role.Equals(model.Role, StringComparison.OrdinalIgnoreCase))
+                if (!user.Role.Equals(model.Role, StringComparison.OrdinalIgnoreCase))
                 {
                     TempData["Error"] = "Incorrect Role.";
                     return RedirectToAction("Index", "Home", new { area = "" });

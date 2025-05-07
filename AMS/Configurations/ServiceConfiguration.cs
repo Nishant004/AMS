@@ -44,8 +44,13 @@ public static class ServiceConfiguration
         services.AddScoped<IAdminRepository, AdminRepository>();
         services.AddScoped<IEmployeeRepository, EmployeeRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<ILeaveRepository, LeaveRepository>();
+        services.AddScoped<IHolidayRepository , HolidayRepository>();
+        services.AddScoped<IHolidayQuotaRepository, HolidayQuotaRepository>();
 
-        
+
+
+
 
         return services;
     }

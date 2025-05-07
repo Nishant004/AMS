@@ -84,5 +84,20 @@ namespace AMS.Data
         //Task<int> AddAsync(User user);
 
         Task<int> DeleteAsyncPermanent(string idColumn, int id); // Delete by ID
+
+
+
+
+        //LeaveRequest//
+
+        Task<IEnumerable<T>> GetLeavesByEmployeeAndMonthAsync(int employeeId, int year);
+
+
+        Task<int> CreateLeaveRequestAsync(T entity);
+
+
+        Task<T?> GetByEmployeeAndYearAsync(int employeeId, int year);
+
+
     }
 }

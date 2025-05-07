@@ -80,7 +80,6 @@ namespace AMS.Areas.Admin.Controllers
                     return View(model);
                 }
 
-                Console.WriteLine($"EmployeeId: {model.EmployeeId}");
 
                 var user = new User
                 {
@@ -297,31 +296,6 @@ namespace AMS.Areas.Admin.Controllers
         }
 
 
-
-        //private async Task LoadEmployeeList(bool excludeUsers = false)
-        //{
-        //    IEnumerable<Employees> employees;
-
-        //    if (excludeUsers)
-        //    {
-        //        // Get employees who are not already assigned to a user
-        //        var userEmployeeIds = (await _userRepository.GetAllAsync())
-        //             .Select(u => u.EmployeeId)
-        //             .ToList();
-
-        //        employees = await _employeeRepository.GetAllAsync();
-
-        //        // Filter out employees that are already in the User table
-        //        employees = employees.Where(e => !userEmployeeIds.Contains(e.EmployeeId)).ToList();
-        //    }
-        //    else
-        //    {
-        //        // Get all employees without filtering
-        //        employees = await _employeeRepository.GetAllAsync();
-        //    }
-
-        //    ViewBag.EmployeeList = new SelectList(employees, "EmployeeId", "FirstName");
-        //}
 
     }
 }

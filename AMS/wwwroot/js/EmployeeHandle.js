@@ -86,7 +86,6 @@
 
 
 
-
 });
 
 
@@ -162,9 +161,9 @@ function handleLogout() {
     $.ajax({
         url: '/account/Logout',
         method: 'POST',
-        headers: {
-            "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
-        },
+        //headers: {
+        //    "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+        //},
         success: function () {
             window.location.href = '/Home/Index';
         },

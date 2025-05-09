@@ -42,50 +42,6 @@ namespace AMS.Repository
             await Task.WhenAll(tasks);
         
 
-
-
-
-            //var tasks = allEmp.Select(empId =>
-            //{
-            //    var checkYearExit = ......;
-
-            //    var quota = new EmployeeHolidayQuota
-            //    {
-            //        EmployeeID = empId,
-            //        Year = year,
-            //        TotalHolidays = totalHolidays
-            //    };
-
-            //    return _holidayQuotaRepository.InsertAsync(quota);
-            //});
-
-            //await Task.WhenAll(tasks); // Ensure async execution is awaited
-
-
-
-            //foreach (var empId in allEmp)
-            //{
-            //    var employeeHolidayQuota = new EmployeeHolidayQuota
-            //    {
-            //        EmployeeID = empId,
-            //        Year = year,
-            //        TotalHolidays = totalHolidays
-            //    };
-
-            //    await _holidayQuotaRepository.InsertAsync(employeeHolidayQuota);
-            //}
-
-            //var employeeHolidayQuota = await new EmployeeHolidayQuota
-            //{
-            //    Year = year,
-            //    TotalHolidays = totalHolidays
-            //};
-            //foreach (var empId in allEmp)
-            //{
-            //    employeeHolidayQuota.EmployeeID = empId;
-            //    _holidayQuota.InsertAsync(employeeHolidayQuota);
-            //}
-            //return Task.FromResult(employeeHolidayQuota);
         }
 
         public async Task<IEnumerable<EmployeeHolidayQuota>> GetQuotasByYearAsync(string idColumn, int year)

@@ -309,49 +309,51 @@ namespace AMS.Areas.Admin.Controllers
         }
 
         //  Download Pdf
-        public async Task<IActionResult> DownloadPdf(int id)
-        {
-            /*  //string pageUrl = Url.Action("EmployeeDetails", "Dashboard", new { id = id }, Request.Scheme, Request.Host.Value);
+        //public async Task<IActionResult> DownloadPdf(int id)
+        //{
+        //    /*  //string pageUrl = Url.Action("EmployeeDetails", "Dashboard", new { id = id }, Request.Scheme, Request.Host.Value);
 
-              //string pageUrl = Url.Action(
-              //    action: "EmployeeDetails",
-              //    controller: "Dashboard",
-              //    values: new { area = "Admin", id = id },
-              //    protocol: Request.Scheme,
-              //    host: Request.Host.Value
-              //);
+        //      //string pageUrl = Url.Action(
+        //      //    action: "EmployeeDetails",
+        //      //    controller: "Dashboard",
+        //      //    values: new { area = "Admin", id = id },
+        //      //    protocol: Request.Scheme,
+        //      //    host: Request.Host.Value
+        //      //);
 
-              //string pageUrl = "https://localhost:7067/Admin/Dashboard/EmployeeDetails/" + id; // Authentication cookie required
-              string pageUrl = "https://mdbootstrap.com/docs/standard/extended/bootstrap4-table-scroll/";
+        //      //string pageUrl = "https://localhost:7067/Admin/Dashboard/EmployeeDetails/" + id; // Authentication cookie required
+        //      string pageUrl = "https://mdbootstrap.com/docs/standard/extended/bootstrap4-table-scroll/";
 
-              var pdfBytes = _pdfService.GeneratePdf(pageUrl);
-              return File(pdfBytes, "application/pdf", "EmployeeDetails.pdf"); // To download the PDF File
-            */
+        //      var pdfBytes = _pdfService.GeneratePdf(pageUrl);
+        //      return File(pdfBytes, "application/pdf", "EmployeeDetails.pdf"); // To download the PDF File
+        //    */
 
-            string idColumn = "EmployeeId";
+        //    string idColumn = "EmployeeId";
 
-            var employee = await _adminRepository.GetByIdAsync(idColumn, id);
-            var attendance = await _adminRepository.GetAttendanceByIdAsync(idColumn, id);
+        //    var employee = await _adminRepository.GetByIdAsync(idColumn, id);
+        //    var attendance = await _adminRepository.GetAttendanceByIdAsync(idColumn, id);
 
-            var model = new EmployeeDetailsViewModel
-            {
-                Employee = employee,
-                AttendanceRecord = attendance.ToList()
-            };
+        //    var model = new EmployeeDetailsViewModel
+        //    {
+        //        Employee = employee,
+        //        AttendanceRecord = attendance.ToList()
+        //    };
 
-            var htmlContent = await _viewRenderService.RenderViewAsync(this.ControllerContext, "EmployeeDetails", model);
+        //    var htmlContent = await _viewRenderService.RenderViewAsync(this.ControllerContext, "EmployeeDetails", model);
 
-            var pdfBytes = _pdfService.GeneratePdfFromHtml(htmlContent);
+        //    var pdfBytes = _pdfService.GeneratePdfFromHtml(htmlContent);
 
-            return File(pdfBytes, "application/pdf", "EmployeeDetails.pdf");
-        }
+        //    return File(pdfBytes, "application/pdf", "EmployeeDetails.pdf");
+        //}
 
         public async Task<IActionResult> DownloadQuestPdf(int id)
         {
             string idColumn = "EmployeeId";
 
             var employee = await _adminRepository.GetByIdAsync(idColumn, id);
+
             var attendance = await _adminRepository.GetAttendanceByIdAsync(idColumn, id);
+
 
             var model = new EmployeeDetailsViewModel
             {

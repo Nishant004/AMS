@@ -1,0 +1,40 @@
+﻿@model AMS.Models.Holidays
+
+<form id="addHolidayForm">
+    <div class="form-group">
+        <label>Date</label>
+        <input asp-for="HolidayDate" class="form-control" type="date" value="@DateTime.Now.ToString("yyyy-MM-dd")" required />
+    </div>
+
+    <div class="form-group">
+        <label>Holiday Name</label>
+        <input asp-for="HolidayName" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label>Type</label>
+        <select asp-for="Description" class="form-control" required>
+            <option value="">-- Select Type --</option>
+            <option value="Public">Public</option>
+            <option value="Weekend">Weekend</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary mt-2">Add Holiday</button>
+</form>
+
+<div id="addHolidayResult" class="mt-2"></div>
+
+
+<!-- Add Sundays Card -->
+<div class="card p-3 mt-4 bg-light border">
+    <h5>Add All Sundays as Holidays</h5>
+    <div class="d-flex align-items-center gap-2">
+        <input type="number" id="sundayYear" class="form-control" value="@DateTime.Now.Year" style="max-width: 150px;" />
+        <button type="button" class="btn btn-outline-secondary" onclick="addSundays()">Add Sundays</button>
+    </div>
+    <div id="addSundaysResult" class="mt-2"></div>
+</div>
+
+<hr />
+<div id="holidayListContainer" class="mt-4"></div>
+
+<div id="result" class="alert mt-3" style="display:none;"></div>

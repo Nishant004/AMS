@@ -32,26 +32,26 @@
 	<i class="fas fa-calendar-check"></i> Attendance Record
 	@if (!string.IsNullOrEmpty(monthYear))
 	{
-				<span class="text-primary">(@monthYear)</span>
+			<span class="text-primary">(@monthYear)</span>
 	}
 </h3>
 @if (records != null && records.Any())
 {
 	@* For Scrolling, Instead you can add paggination*@
-		<div style="max-height: 400px; overflow-y: auto;">
+	<div style="max-height: 400px; overflow-y: auto;">
 		@* <table class="table table-bordered"> *@
 		@*     <thead> *@
-			<table class="table table-bordered table-striped shadow-sm">
-				<thead class="table-head">
-					<tr>
-
-						<th><i class="fas fa-calendar-day"></i> Date</th>
-						<th><i class="fas fa-sign-in-alt"></i> Check-In</th>
-						<th><i class="fas fa-sign-out-alt"></i> Check-Out</th>
-						<th><i class="fas fa-hourglass-half"></i> Total Hours</th>
-					</tr>
-				</thead>
-				<tbody>
+		<table class="table table-bordered table-striped shadow-sm">
+			<thead class="table-head">
+				<tr>
+				
+					<th><i class="fas fa-calendar-day"></i> Date</th>
+					<th><i class="fas fa-sign-in-alt"></i> Check-In</th>
+					<th><i class="fas fa-sign-out-alt"></i> Check-Out</th>
+					<th><i class="fas fa-hourglass-half"></i> Total Hours</th>
+				</tr>
+			</thead>
+			<tbody>
 				@foreach (var attendance in records)
 				{
 
@@ -60,51 +60,51 @@
 					? attendance.CheckOutTime.Value - attendance.CheckInTime
 					: null;
 
-							<tr>
+					<tr>
+					
 
+						<td>@attendance.AttendanceDate.ToString("dd MMM yyyy")</td>
 
-								<td>@attendance.AttendanceDate.ToString("dd MMM yyyy")</td>
-
-								<td>
-									<span class="badge bg-success">
+						<td>
+							<span class="badge bg-success">
 								@DateTime.Today.Add(attendance.CheckInTime).ToString("hh:mm tt")
-									</span>
-								</td>
-								<td>
+							</span>
+						</td>
+						<td>
 							@if (attendance.CheckOutTime.HasValue)
 							{
-											<span class="badge bg-danger">
+								<span class="badge bg-danger">
 									@DateTime.Today.Add(attendance.CheckOutTime.Value).ToString("hh:mm tt")
-											</span>
+								</span>
 							}
 							else
 							{
-											<span class="text-muted">--</span>
+								<span class="text-muted">--</span>
 							}
-								</td>
-								<td>
+						</td>
+						<td>
 							@if (totalHours.HasValue)
 							{
-											<span class="badge bg-info text-dark">
+								<span class="badge bg-info text-dark">
 									@($"{totalHours.Value.Hours}h {totalHours.Value.Minutes}m")
-											</span>
+								</span>
 							}
 							else
 							{
-											<span class="text-muted">--</span>
+								<span class="text-muted">--</span>
 							}
-								</td>
-							</tr>
+						</td>
+					</tr>
 				}
-				</tbody>
-			</table>
-		</div>
+			</tbody>
+		</table>
+	</div>
 }
 else
 {
-		<div class="alert alert-warning">
-			<i class="fas fa-exclamation-circle"></i> No attendance records found for this employee.
-		</div>
+	<div class="alert alert-warning">
+		<i class="fas fa-exclamation-circle"></i> No attendance records found for this employee.
+	</div>
 }
 
 <a class="btn btn-outline-primary mt-3" asp-controller="Attendance" asp-action="Index" asp-area="">

@@ -12,6 +12,7 @@ using AMS.Helpers;
 using System.Linq.Expressions;
 using AMS.Models.ViewModel;
 using Azure.Core;
+using Microsoft.EntityFrameworkCore;
 
 namespace YourNamespace.Controllers
 {
@@ -50,7 +51,7 @@ namespace YourNamespace.Controllers
         public async Task<IActionResult> GetAllQuotas(int year)
         {
             var idColumn = "Year";
-            var quotas = await _holidayQuotaRepository.GetQuotasByYearAsync(idColumn,year);
+            var quotas = await _holidayQuotaRepository.GetQuotasByYearAsync(idColumn, year);
 
             var employees = await _employeeRepository.GetAllAsync();
 
@@ -63,7 +64,7 @@ namespace YourNamespace.Controllers
                               Year = q.Year,
                               TotalHolidays = q.TotalHolidays
                           }).ToList();
-                          
+
 
             return PartialView("_QuotaTable", result);
         }
@@ -86,7 +87,7 @@ namespace YourNamespace.Controllers
 
                 var employees = await _employeeRepository.GetAllAsync();
 
-                
+
 
                 var allEmp = employees.Select(e => e.EmployeeId).ToList();
 
@@ -115,7 +116,7 @@ namespace YourNamespace.Controllers
             var leaves = await _leaveRepository.GetAllLeavesAsync();
 
             var pending = leaves.Where(l => l.Status == "Pending").ToList();
-   
+
             return PartialView("_PendingLeaves", pending);
         }
 
@@ -135,7 +136,7 @@ namespace YourNamespace.Controllers
 
                 var idColumn = "LeaveId";
                 // 🟡 Step 1: Get full existing leave record
-                var existing = await _leaveRepository.GetLeaveByIdAsync(idColumn,dto.LeaveId);
+                var existing = await _leaveRepository.GetLeaveByIdAsync(idColumn, dto.LeaveId);
                 if (existing == null)
                     return NotFound("Leave request not found.");
 
@@ -143,7 +144,7 @@ namespace YourNamespace.Controllers
                 existing.Status = dto.Status;
 
                 // 🟢 Step 3: Perform update
-            
+
                 var updated = await _leaveRepository.UpdateAsync(idColumn, existing);
 
                 return Ok("Status updated.");
@@ -178,216 +179,87 @@ namespace YourNamespace.Controllers
 
 
 
+        //holiday incert
+
+
+
+        [HttpPost]
+        public async Task<IActionResult> AddHoliday([FromBody] Holidays model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest("Invalid data. Please check the form.");
+
+            model.HolidayDate = model.HolidayDate.Date; // Normalize
+
+            if (await _holidayRepository.ExistsAsync(model.HolidayDate))
+                return BadRequest("Holiday already exists on this date.");
+
+            await _holidayRepository.AddHolidayAsync(model);
+            return Ok("Holiday added successfully.");
+        }
 
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        //var sql = @"
-        //    IF EXISTS (SELECT 1 FROM EmployeeHolidayQuota WHERE EmployeeID = @EmployeeID AND Year = @Year)
-        //        UPDATE EmployeeHolidayQuota 
-        //        SET TotalHolidays = @TotalHolidays 
-        //        WHERE EmployeeID = @EmployeeID AND Year = @Year
-        //    ELSE
-        //        INSERT INTO EmployeeHolidayQuota (EmployeeID, Year, TotalHolidays)
-        //        VALUES (@EmployeeID, @Year, @TotalHolidays)";
-
-
-
-
-
-
-
-
-
-
-
-
-
-        // 1. Set holiday quota for an employee in a year
-        //[HttpPost]
-        //public async Task<IActionResult> SetQuota([FromBody] EmployeeHolidayQuota request)
-        //{
-
-        //    var userSession = SessionHelper.GetUserSession(HttpContext);
-        //    if (userSession == null || !userSession.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
-        //    {
-        //        return RedirectToAction("Index", "Home", new { area = "" });
-        //    }
-
-        //    try 
-        //    {
-
-        //        if (!ModelState.IsValid)
-        //        {
-        //            TempData["ErrorMessage"] = "Please correct the errors.";
-        //            //await LoadEmployeeList(excludeUsers: true);
-        //            return View(request);
-        //        }
-
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // Log the exception
-        //        return BadRequest("An error occurred while processing your request.");
-        //    }
-
-
-
-
-
-        //    var sql = @"
-        //        IF EXISTS (SELECT 1 FROM EmployeeHolidayQuota WHERE EmployeeID = @EmployeeID AND Year = @Year)
-        //            UPDATE EmployeeHolidayQuota 
-        //            SET TotalHolidays = @TotalHolidays 
-        //            WHERE EmployeeID = @EmployeeID AND Year = @Year
-        //        ELSE
-        //            INSERT INTO EmployeeHolidayQuota (EmployeeID, Year, TotalHolidays)
-        //            VALUES (@EmployeeID, @Year, @TotalHolidays)";
-
-        //    await _db.ExecuteAsync(sql, request);
-        //    return Ok("Holiday quota set successfully.");
-        //}
-
-        //// 2. Approve a leave request
-        //[HttpPost]
-        //public async Task<IActionResult> ApproveLeave(int leaveId)
-        //{
-        //    var sql = "UPDATE LeaveRequests SET Status = 'Approved' WHERE LeaveID = @LeaveID";
-        //    var rows = await _db.ExecuteAsync(sql, new { LeaveID = leaveId });
-
-        //    if (rows > 0)
-        //        return Ok("Leave approved.");
-        //    else
-        //        return NotFound("Leave ID not found.");
-        //}
-
-        // 3. Set holidays for the year: Sundays + festivals
+        [HttpGet]
+        public IActionResult AddHolidayForm()
+        {
+            return PartialView("_AddHolidayPartial", new Holidays());
+        }
 
 
 
         //[HttpPost]
-        //public async Task<IActionResult> SetHolidays(int year)
+        //public async Task<IActionResult> AddSundays(int year)
         //{
-        //    var holidays = new List<dynamic>();
 
-        //    // Add Sundays
-        //    var date = new DateTime(year, 1, 1);
-        //    while (date.Year == year)
-        //    {
-        //        if (date.DayOfWeek == DayOfWeek.Sunday)
-        //        {
-        //            holidays.Add(new
-        //            {
-        //                HolidayName = "Sunday",
-        //                HolidayDate = date,
-        //                Description = "Weekly Off"
-        //            });
-        //        }
-        //        date = date.AddDays(1);
-        //    }
+        //    if (year < 2000 || year > 2100)
+        //        return BadRequest("Invalid year.");
 
-        //    // Add general/festival holidays
-        //    holidays.AddRange(new[]
-        //    {
-        //        new { HolidayName = "New Year", HolidayDate = new DateTime(year, 1, 1), Description = "New Year Day" },
-        //        new { HolidayName = "Republic Day", HolidayDate = new DateTime(year, 1, 26), Description = "National Holiday" },
-        //        new { HolidayName = "Independence Day", HolidayDate = new DateTime(year, 8, 15), Description = "National Holiday" },
-        //        new { HolidayName = "Gandhi Jayanti", HolidayDate = new DateTime(year, 10, 2), Description = "National Holiday" },
-        //        new { HolidayName = "Christmas", HolidayDate = new DateTime(year, 12, 25), Description = "Christmas Day" }
-        //    });
+        //    var count = await _holidayRepository.AddSundaysAsync(year);
+        //    return Ok($"{count} Sundays added as holidays for {year}.");
 
-        //    var insertSql = @"
-        //        IF NOT EXISTS (SELECT 1 FROM Holidays WHERE HolidayDate = @HolidayDate)
-        //        BEGIN
-        //            INSERT INTO Holidays (HolidayName, HolidayDate, Description)
-        //            VALUES (@HolidayName, @HolidayDate, @Description)
-        //        END";
-
-        //    foreach (var h in holidays)
-        //    {
-        //        await _db.ExecuteAsync(insertSql, h);
-        //    }
-
-        //    return Ok("Holidays set for the year.");
         //}
 
-        // DTO for setting quota
+        [HttpPost]
+        [Route("Admin/Holiday/AddSundays/{year}")]
+        public async Task<IActionResult> AddSundays(int year)
+        {
+            try
+            {
 
-        //public class EmployeeHolidayQuota
-        //{
-        //    public int EmployeeID { get; set; }
-        //    public int Year { get; set; }
-        //    public int TotalHolidays { get; set; }
-        //}
+                if (year < 2000 || year > 2100)
+                    return BadRequest("Invalid year.");
+
+                var count = await _holidayRepository.AddSundaysAsync(year);
+                return Ok($"{count} Sundays added as holidays for {year}.");
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Failed to add Sundays: " + ex.Message);
+            }
+        }
+
+
+
+        public async Task<IActionResult> GetAllHolidays()
+        {
+            var holidays = await _holidayRepository.GetAllHolidays();
+
+            if (holidays == null || !holidays.Any())
+            {
+                holidays = new List<Holidays>(); // ensures the view won't break
+            }
+
+            var sortedHolidays = holidays.OrderBy(h => h.HolidayDate).ToList();
+
+            return PartialView("_HolidayListPartial", sortedHolidays);
+        }
+
+
 
     }
 }
-
-
-
-
-
-
-
-
-
-//using AMS.Models;
-//using System.Data;
-//using Microsoft.AspNetCore.Mvc;
-//using Microsoft.Data.SqlClient;
-//using Dapper;
-
-//namespace AMS.Controllers
-//{
-//    public class HolidayController : Controller
-//    {
-//        private readonly IDbConnection _db;
-
-//        public HolidayController(IConfiguration config)
-//        {
-//            _db = new SqlConnection(config.GetConnectionString("DefaultConnection"));
-//        }
-
-//        public async Task<IActionResult> Index()
-//        {
-//            var holidays = await _db.QueryAsync<Holiday>("SELECT * FROM Holidays");
-//            return View(holidays);
-//        }
-
-//        [HttpPost]
-//        public async Task<IActionResult> SetQuota(int employeeId, int year, int totalHolidays)
-//        {
-//            var query = "INSERT INTO EmployeeHolidayQuota (EmployeeID, Year, TotalHolidays) VALUES (@EmployeeID, @Year, @TotalHolidays)";
-//            await _db.ExecuteAsync(query, new { employeeId, year, totalHolidays });
-//            return RedirectToAction("Index");
-//        }
-
-
-//        [HttpPost]
-//        public async Task<IActionResult> ApproveLeave(int leaveId)
-//        {
-//            var query = "UPDATE LeaveRequests SET Status = 'Approved' WHERE LeaveID = @LeaveID";
-//            await _db.ExecuteAsync(query, new { LeaveID = leaveId });
-//            return RedirectToAction("Index");
-//        }
-
-
-//    }
-//}

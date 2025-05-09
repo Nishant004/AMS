@@ -1,0 +1,21 @@
+﻿@model IEnumerable<AMS.Models.Holidays>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Name</th>
+            <th>Type</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var h in Model)
+        {
+            <tr>
+                <td>@h.HolidayDate.ToString("yyyy-MM-dd")</td>
+                <td>@h.HolidayName</td>
+                <td>@h.Description</td>
+            </tr>
+        }
+    </tbody>
+</table>

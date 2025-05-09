@@ -8,24 +8,27 @@
 
     <!-- TABS HEADER -->
     <ul class="nav nav-tabs" id="holidayTabs" role="tablist">
-        <li class="nav-item" role="presentation">
+        <li class="nav-item">
             <button class="nav-link active" id="quota-tab" data-bs-toggle="tab" data-bs-target="#quota" type="button" role="tab">Employee Quotas</button>
         </li>
-        <li class="nav-item" role="presentation">
+        <li class="nav-item">
             <button class="nav-link" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab">Pending Leaves</button>
         </li>
-        <li class="nav-item" role="presentation">
+        <li class="nav-item">
             <button class="nav-link" id="approved-tab" data-bs-toggle="tab" data-bs-target="#approved" type="button" role="tab">Approved Leaves</button>
         </li>
-        <li class="nav-item" role="presentation">
+        <li class="nav-item">
             <button class="nav-link" id="rejected-tab" data-bs-toggle="tab" data-bs-target="#rejected" type="button" role="tab">Rejected Leaves</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="AddHoliday-tab" data-bs-toggle="tab" data-bs-target="#AddHoliday" type="button" role="tab">Add Holiday</button>
         </li>
     </ul>
 
     <!-- TABS CONTENT -->
     <div class="tab-content mt-3" id="holidayTabsContent">
 
-        <!-- TAB 1: QUOTA -->
+        <!-- Tab 1: Quota -->
         <div class="tab-pane fade show active" id="quota" role="tabpanel">
             <div class="card p-3 mb-4">
                 <h4>Set Holiday Quota for All Employees</h4>
@@ -48,35 +51,42 @@
                     <input type="number" id="quotaViewYear" class="form-control" value="@DateTime.Now.Year" style="max-width: 200px;" />
                     <button class="btn btn-secondary" onclick="loadQuotaTable()">Load Quotas</button>
                 </div>
-
-                <!-- Display Quota Table -->
                 <div id="quotaTableContainer"></div>
             </div>
+        </div>
 
-        </div> 
-        <!-- TAB 2: PENDING LEAVES -->
+        <!-- Tab 2: Pending -->
         <div class="tab-pane fade" id="pending" role="tabpanel">
             <h4>Pending Leave Requests</h4>
             <div id="pendingLeavesContainer">Loading...</div>
         </div>
 
-            <!-- TAB 2: PENDING LEAVES -->
+        <!-- Tab 3: Approved -->
         <div class="tab-pane fade" id="approved" role="tabpanel">
             <h4>Approved Leaves</h4>
             <div id="approvedLeavesContainer">Loading...</div>
         </div>
 
-        <!-- TAB 3: Rejected LEAVES -->
+        <!-- Tab 4: Rejected -->
         <div class="tab-pane fade" id="rejected" role="tabpanel">
             <h4>Rejected Leaves</h4>
             <div id="rejectedLeavesContainer">Loading...</div>
         </div>
 
+        <!-- Tab 5: Add Holiday -->
+        <div class="tab-pane fade" id="AddHoliday" role="tabpanel">
+            <h4>Add Holiday</h4>
+            <div id="AddHolidayContainer">Loading...</div>
+        </div>
     </div>
 
-    <div id="result" class="alert mt-3" style="display:none;"></div>
+   
 </div>
 
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/js/Holidays.js"></script>
+
+@* 
 @section Scripts {
     <script>
         function showResult(message, success = true) {
@@ -91,6 +101,7 @@
             }, 4000);
         }
 
+        // Quota form submission
         document.getElementById("bulkQuotaForm").addEventListener("submit", async function (e) {
             e.preventDefault();
             const data = Object.fromEntries(new FormData(this));
@@ -104,31 +115,20 @@
             if (res.ok) loadQuotaTable(data.year);
         });
 
-        // async function loadQuotaTable(year) {
-        //     const res = await fetch(`/Admin/Holiday/GetAllQuotas?year=${year}`);
-        //     const html = await res.text();
-        //     document.getElementById("quotaTableContainer").innerHTML = html;
-        // }
-
-            async function loadQuotaTable() {
+        // Load quota table
+        async function loadQuotaTable() {
             const year = document.getElementById("quotaViewYear").value;
-            fetch(`/Admin/Holiday/GetAllQuotas?year=${year}`)
-                .then(res => res.text())
-                .then(html => {
-                    document.getElementById("quotaTableContainer").innerHTML = html;
-                })
-                .catch(() => {
-                    document.getElementById("quotaTableContainer").innerHTML = "<div class='alert alert-danger'>Failed to load data.</div>";
-                });
-             }
+            try {
+                const res = await fetch(`/Admin/Holiday/GetAllQuotas?year=${year}`);
+                const html = await res.text();
+                document.getElementById("quotaTableContainer").innerHTML = html;
+            } catch {
+                document.getElementById("quotaTableContainer").innerHTML = "<div class='alert alert-danger'>Failed to load data.</div>";
+            }
+        }
 
-            // Optionally auto-load current year on page load
-            document.addEventListener("DOMContentLoaded", function () {
-                loadQuotaTable();
-            });
-
-
-          function updateLeaveStatus(leaveId) {
+        // Update leave status
+        function updateLeaveStatus(leaveId) {
             const dropdown = document.querySelector(`.status-dropdown[data-leave-id='${leaveId}']`);
             const newStatus = dropdown.value;
 
@@ -136,20 +136,79 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ leaveId, status: newStatus })
-            })
-                   .then(res => {
-            if (res.ok) {
-                showResult("Status updated.");
-                loadPendingLeaves(); // Reload only the pending section
-            } else {
-                showResult("Failed to update status.", false);
-            }
-        });
+            }).then(res => {
+                if (res.ok) {
+                    showResult("Status updated.");
+                    loadPendingLeaves();
+                } else {
+                    showResult("Failed to update status.", false);
+                }
+            });
         }
 
+        // Load Add Holiday tab
+        async function AddHolidayLeaves() {
+            const res = await fetch("/Admin/Holiday/AddHolidayForm");
+            const html = await res.text();
+            document.getElementById("AddHolidayContainer").innerHTML = html;
+            attachAddHolidayFormHandler();
+            loadHolidays(); // refresh list
+        }
 
+        // Handle Add Holiday Form
+        function attachAddHolidayFormHandler() {
+            const form = document.getElementById("addHolidayForm");
+            if (!form) return;
 
+            form.addEventListener("submit", async function (e) {
+                e.preventDefault();
+                const formData = Object.fromEntries(new FormData(form));
+                const res = await fetch('/Admin/Holiday/AddHoliday', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
 
+                const msg = await res.text();
+                document.getElementById("addHolidayResult").innerHTML =
+                    `<div class="alert ${res.ok ? 'alert-success' : 'alert-danger'}">${msg}</div>`;
+
+                if (res.ok) loadHolidays();
+            });
+        }
+
+        // Add all Sundays
+        async function addSundays() {
+            const year = parseInt(document.getElementById("sundayYear").value);
+			console.log("Year entered:", year); // Debug log
+            if (!year || year < 2000 || year > 2100) {
+                document.getElementById("addSundaysResult").innerHTML =
+                    `<div class="alert alert-danger">Please enter a valid year (2000-2100).</div>`;
+                return;
+            }
+
+            const res = await fetch(`/Admin/Holiday/AddSundays/${year}`, { method: "POST" });
+            const msg = await res.text();
+            document.getElementById("addSundaysResult").innerHTML =
+                `<div class="alert ${res.ok ? 'alert-success' : 'alert-danger'}">${msg}</div>`;
+
+            if (res.ok) loadHolidays();
+        }
+
+        // Load holiday list
+        async function loadHolidays() {
+            try {
+                const res = await fetch("/Admin/Holiday/GetAllHolidays");
+                const html = await res.text();
+                const container = document.getElementById("holidayListContainer");
+                if (container) container.innerHTML = html;
+            } catch {
+                document.getElementById("holidayListContainer").innerHTML =
+                    "<div class='alert alert-danger'>Failed to load holidays.</div>";
+            }
+        }
+
+        // Leave status tab loading
         async function loadPendingLeaves() {
             const res = await fetch("/Admin/Holiday/GetPendingLeaves");
             document.getElementById("pendingLeavesContainer").innerHTML = await res.text();
@@ -160,21 +219,21 @@
             document.getElementById("approvedLeavesContainer").innerHTML = await res.text();
         }
 
-         async function loadRejectedLeaves() {
+        async function loadRejectedLeaves() {
             const res = await fetch("/Admin/Holiday/GetRejectedLeaves");
             document.getElementById("rejectedLeavesContainer").innerHTML = await res.text();
         }
 
+        // Initialize
+        document.addEventListener("DOMContentLoaded", function () {
+            loadQuotaTable();
 
-        // Load initial quota for current year
-        loadQuotaTable(new Date().getFullYear());
-
-        // Load data when tabs are clicked
-        document.getElementById("pending-tab").addEventListener("click", loadPendingLeaves);
-        document.getElementById("approved-tab").addEventListener("click", loadApprovedLeaves);
-         document.getElementById("rejected-tab").addEventListener("click", loadRejectedLeaves);
-
+            document.getElementById("pending-tab").addEventListener("click", loadPendingLeaves);
+            document.getElementById("approved-tab").addEventListener("click", loadApprovedLeaves);
+            document.getElementById("rejected-tab").addEventListener("click", loadRejectedLeaves);
+            document.getElementById("AddHoliday-tab").addEventListener("click", AddHolidayLeaves);
+        });
     </script>
 }
 
-
+ *@

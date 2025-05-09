@@ -603,7 +603,7 @@ namespace AMS.Data
 
 
         }
-
+        
 
 
         public async Task<T?> GetByEmployeeAndYearAsync(int employeeId, int year)
@@ -615,8 +615,27 @@ namespace AMS.Data
 
 
 
+        public async Task<bool> ExistsAsync(DateTime date)
+        {
+            var sql = $"SELECT COUNT(1) FROM [{_tableName}] WHERE HolidayDate = @Date";
+            using var conn = _context.CreateConnection();
+            return await conn.ExecuteScalarAsync<bool>(sql, new { Date = date.Date });
+        }
+
+
+
+
+
+
+
+
     }
+
+
+
+
 }
+
 
 
 

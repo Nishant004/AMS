@@ -98,6 +98,9 @@ namespace AMS.Data
 
         Task<T?> GetByEmployeeAndYearAsync(int employeeId, int year);
 
+        Task<bool> ExistsAsync(DateTime date);
+
+
 
     }
 }

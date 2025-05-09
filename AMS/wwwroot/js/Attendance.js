@@ -140,10 +140,12 @@ function fetchAttendance() {
                 grouped[empId].attendance[date] = item.status;
             });
 
+
             // Build rows
             for (const empId in grouped) {
                 const employee = grouped[empId];
                 //let row = `<tr><td>${employee.name}</td>`;
+
                 let row = `<tr><td><a href="/Admin/Dashboard/EmployeeDetails/${empId}">${employee.name}</a></td>`;
                 //let employeeUrl = employeeDetailsBaseUrl.replace('__ID__', empId);
                 //let row = `<tr><td><a href="${employeeUrl}">${employee.name}</a></td>`;

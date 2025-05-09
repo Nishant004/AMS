@@ -441,22 +441,6 @@ namespace AMS.Data
 
 
 
-
-
-
-
-
-        // Get Attendance By Id
-        //public async Task<IEnumerable<T>> GetAttendanceByIdAsync(string idColumn, int id)
-        //{
-        //    var query = $"SELECT * FROM {_tableName} WHERE {idColumn} = @Id";
-        //    using var connection = _context.CreateConnection();
-        //    return await connection.QueryAsync<T>(query, new { Id = id });
-        //}
-
-
-
-
         public async Task<IEnumerable<AttendanceLogDto>> GetAttendanceLogsAsync(int employeeId, int year, int month, int day)
         {
             using var connection = _context.CreateConnection();

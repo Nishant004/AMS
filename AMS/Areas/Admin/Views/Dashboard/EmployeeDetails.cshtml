@@ -4,7 +4,15 @@
 	ViewData["Title"] = "Employee Details";
 	var employee = Model.Employee;
 	var records = Model.AttendanceRecord;
-	var monthYear = records?.FirstOrDefault()?.AttendanceDate.ToString("MMMM yyyy"); // null-conditional operators (?.) 
+	//var monthYear = records?.FirstOrDefault()?.AttendanceDate.ToString("MMMM yyyy"); // null-conditional operators (?.) 
+
+	var firstDate = records?.FirstOrDefault()?.AttendanceDate;
+
+	var month = firstDate?.Month ?? DateTime.Now.Month;
+	var year = firstDate?.Year ?? DateTime.Now.Year;
+	var monthYear = firstDate?.ToString("MMMM yyyy"); // for display
+
+
 }
 
 <div class="card shadow-lg mb-4 border-primary">
@@ -13,9 +21,22 @@
 		@* <a class="btn btn-danger" asp-controller="DashBoard" asp-action="DownloadPdf" asp-route-id="@employee.EmployeeId">
 			<i class="fas fa-file-pdf"></i> Download PDF
 		</a> *@
-		<a class="btn btn-warning" asp-controller="Dashboard" asp-action="DownloadQuestPdf" asp-route-id="@employee.EmployeeId">
+		@* <a class="btn btn-warning" asp-controller="Dashboard" asp-action="DownloadQuestPdf" asp-route-id="@employee.EmployeeId">
 			<i class="fas fa-file-pdf"></i> Download PDF
-		</a>
+		</a> *@
+
+		<a class="btn btn-warning"
+   asp-controller="Dashboard"
+   asp-action="DownloadQuestPdf"
+   asp-route-id="@employee.EmployeeId"
+    asp-route-month="@month"
+   asp-route-year="@year">
+	<i class="fas fa-file-pdf"></i> Download PDF
+</a>
+
+
+
+
 	</div>
 	<div class="card-body">
 		<h4 class="mb-3 text-primary"><i class="fas fa-id-badge"></i>  @($"{employee.FirstName} {employee.LastName}")</h4>

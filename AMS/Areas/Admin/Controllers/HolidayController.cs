@@ -210,19 +210,6 @@ namespace YourNamespace.Controllers
         }
 
 
-
-        //[HttpPost]
-        //public async Task<IActionResult> AddSundays(int year)
-        //{
-
-        //    if (year < 2000 || year > 2100)
-        //        return BadRequest("Invalid year.");
-
-        //    var count = await _holidayRepository.AddSundaysAsync(year);
-        //    return Ok($"{count} Sundays added as holidays for {year}.");
-
-        //}
-
         [HttpPost]
         [Route("Admin/Holiday/AddSundays/{year}")]
         public async Task<IActionResult> AddSundays(int year)

@@ -74,8 +74,7 @@ namespace AMS.Controllers
                     return RedirectToAction("Index", "Home", new { area = "" });
                 }
 
-                //Console.WriteLine($"Raw password: {model.PasswordHash}");
-                //Console.WriteLine($"Stored hash: {user.PasswordHash}");
+               
 
                 // 2. Verify password
 

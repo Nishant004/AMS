@@ -29,19 +29,7 @@ namespace AMS.Controllers
             }
 
 
-            // You now have access to:
-            //var username = userSession.Name;
-
-            //Console.WriteLine("Logged in user: " + username);
-
-
-            //var email = HttpContext.Session.GetString("User");
-
-
-            //if (string.IsNullOrEmpty(email))
-            //{
-            //    return RedirectToAction("Login", "Dashboard");
-            //}
+         
 
             var employee = await _adminRepository.GetAllAsync();
 

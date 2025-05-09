@@ -24,11 +24,7 @@ namespace AMS.Areas.Employee.Controllers
 
         public async Task<IActionResult> Index()
         {
-            //var employeeId = HttpContext.Session.GetInt32("EmployeeId");
-            //if (employeeId == null)
-            //{
-            //    return RedirectToAction("Index", "Home", new { area = "" });
-            //}
+            
 
             var userSession = SessionHelper.GetUserSession(HttpContext);
             if (userSession == null || !userSession.Role.Equals("Employee", StringComparison.OrdinalIgnoreCase))
@@ -218,11 +214,7 @@ namespace AMS.Areas.Employee.Controllers
         [HttpGet]
         public async Task<IActionResult> AttendanceLog(int year, int month, int day)
         {
-            //var employeeId = HttpContext.Session.GetInt32("EmployeeId");
-            //if (employeeId == null)
-            //{
-            //    return Unauthorized();
-            //}
+           
 
             var userSession = SessionHelper.GetUserSession(HttpContext);
             if (userSession == null || !userSession.Role.Equals("Employee", StringComparison.OrdinalIgnoreCase))

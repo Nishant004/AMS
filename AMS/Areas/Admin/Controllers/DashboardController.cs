@@ -61,12 +61,7 @@ namespace AMS.Areas.Admin.Controllers
             Console.WriteLine("Create Post called");
 
 
-            //var email = HttpContext.Session.GetString("UserSession");
-
-            //if (string.IsNullOrEmpty(email))
-            //{
-            //    return RedirectToAction("Index", "Home", new { area = "" });
-            //}
+     
 
             var userSession = SessionHelper.GetUserSession(HttpContext);
             if (userSession == null || !userSession.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
@@ -77,8 +72,7 @@ namespace AMS.Areas.Admin.Controllers
 
             if (ModelState.IsValid)
             {
-                // Set only the date part (time becomes 00:00:00)
-                //employee.JoiningDate = employee.JoiningDate.Date;
+                
 
                 @employee.JoiningDate.ToString("dd/MM/yyyy");
 
@@ -113,14 +107,7 @@ namespace AMS.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            //Console.WriteLine("Edit: Get");
-
-            //var email = HttpContext.Session.GetString("UserSession");
-
-            //if (string.IsNullOrEmpty(email))
-            //{
-            //    return RedirectToAction("Index", "Home", new { area = "" });
-            //}
+        
 
             var userSession = SessionHelper.GetUserSession(HttpContext);
             if (userSession == null || !userSession.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
@@ -145,12 +132,7 @@ namespace AMS.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit([Bind("EmployeeId, FirstName, LastName, Email, PhoneNumber, Department, Designation, JoiningDate, Status,Project")] Employees employee)
         {
-            //var email = HttpContext.Session.GetString("UserSession"); // Use logged-in user's email
-
-            //if (string.IsNullOrEmpty(email))
-            //{
-            //    return RedirectToAction("Index", "Home", new { area = "" }); // Redirect if not logged in
-            //}
+            
 
             var userSession = SessionHelper.GetUserSession(HttpContext);
             if (userSession == null || !userSession.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
@@ -205,12 +187,7 @@ namespace AMS.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
-            //var email = HttpContext.Session.GetString("UserSession");
-
-            //if (string.IsNullOrEmpty(email))
-            //{
-            //    return RedirectToAction("Index", "Home", new { area = "" });
-            //}
+            
 
             var userSession = SessionHelper.GetUserSession(HttpContext);
             if (userSession == null || !userSession.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
@@ -237,13 +214,7 @@ namespace AMS.Areas.Admin.Controllers
         {
             Console.WriteLine("ConfirmDelete Called");
 
-            //var email = HttpContext.Session.GetString("UserSession");
-
-            //if (string.IsNullOrEmpty(email))
-            //{
-            //    return RedirectToAction("Index", "Home", new { area = "" });
-            //}
-
+       
             var userSession = SessionHelper.GetUserSession(HttpContext);
             if (userSession == null || !userSession.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
             {
@@ -278,14 +249,9 @@ namespace AMS.Areas.Admin.Controllers
 
 
 
-        public async Task<IActionResult> EmployeeDetails(int id)
+        public async Task<IActionResult> EmployeeDetails(int id, int? month, int? year)
         {
-            //var email = HttpContext.Session.GetString("UserSession");
-
-            //if (string.IsNullOrEmpty(email))
-            //{
-            //    return RedirectToAction("Index", "Home", new { area = "" });
-            //}
+            
 
             var userSession = SessionHelper.GetUserSession(HttpContext);
             if (userSession == null || !userSession.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
@@ -299,6 +265,13 @@ namespace AMS.Areas.Admin.Controllers
             var employee = await _adminRepository.GetByIdAsync(idColumn, id);
             var attendence = await _adminRepository.GetAttendanceByIdAsync(idColumn, id);
 
+            if (month.HasValue && year.HasValue)
+            {
+                attendence = attendence
+                    .Where(a => a.AttendanceDate.Month == month.Value && a.AttendanceDate.Year == year.Value)
+                    .ToList();
+            }
+
             var viewModel = new EmployeeDetailsViewModel
             {
                 Employee = employee,
@@ -306,67 +279,41 @@ namespace AMS.Areas.Admin.Controllers
             };
 
             return View(viewModel);
+
+          
         }
 
-        //  Download Pdf
-        //public async Task<IActionResult> DownloadPdf(int id)
-        //{
-        //    /*  //string pageUrl = Url.Action("EmployeeDetails", "Dashboard", new { id = id }, Request.Scheme, Request.Host.Value);
+     
 
-        //      //string pageUrl = Url.Action(
-        //      //    action: "EmployeeDetails",
-        //      //    controller: "Dashboard",
-        //      //    values: new { area = "Admin", id = id },
-        //      //    protocol: Request.Scheme,
-        //      //    host: Request.Host.Value
-        //      //);
-
-        //      //string pageUrl = "https://localhost:7067/Admin/Dashboard/EmployeeDetails/" + id; // Authentication cookie required
-        //      string pageUrl = "https://mdbootstrap.com/docs/standard/extended/bootstrap4-table-scroll/";
-
-        //      var pdfBytes = _pdfService.GeneratePdf(pageUrl);
-        //      return File(pdfBytes, "application/pdf", "EmployeeDetails.pdf"); // To download the PDF File
-        //    */
-
-        //    string idColumn = "EmployeeId";
-
-        //    var employee = await _adminRepository.GetByIdAsync(idColumn, id);
-        //    var attendance = await _adminRepository.GetAttendanceByIdAsync(idColumn, id);
-
-        //    var model = new EmployeeDetailsViewModel
-        //    {
-        //        Employee = employee,
-        //        AttendanceRecord = attendance.ToList()
-        //    };
-
-        //    var htmlContent = await _viewRenderService.RenderViewAsync(this.ControllerContext, "EmployeeDetails", model);
-
-        //    var pdfBytes = _pdfService.GeneratePdfFromHtml(htmlContent);
-
-        //    return File(pdfBytes, "application/pdf", "EmployeeDetails.pdf");
-        //}
-
-        public async Task<IActionResult> DownloadQuestPdf(int id)
+        public async Task<IActionResult> DownloadQuestPdf(int id, int month, int year)
         {
             string idColumn = "EmployeeId";
 
-            var employee = await _adminRepository.GetByIdAsync(idColumn, id);
+     
 
+            var employee = await _adminRepository.GetByIdAsync(idColumn, id);
             var attendance = await _adminRepository.GetAttendanceByIdAsync(idColumn, id);
 
+
+
+            // Filter attendance for the given month and year
+            attendance = attendance
+                .Where(a => a.AttendanceDate.Month == month && a.AttendanceDate.Year == year)
+                .ToList();
 
             var model = new EmployeeDetailsViewModel
             {
                 Employee = employee,
-                AttendanceRecord = attendance.ToList()
+                AttendanceRecord = (List<Attendance>)attendance
             };
 
             var document = new EmployeeDetailsDocument(model);
             var pdfBytes = document.GeneratePdf();
 
-            // Format filename: AnkitApril25
-            var monthName = DateTime.Now.ToString("MMMM");
-            var yearTwoDigit = DateTime.Now.ToString("yy");
+            // Format filename: AnkitApril25.pdf
+            var date = new DateTime(year, month, 1);
+            var monthName = date.ToString("MMMM");
+            var yearTwoDigit = date.ToString("yy");
             var firstName = employee?.FirstName?.Replace(" ", "") ?? "Employee";
             var lastName = employee?.LastName?.Replace(" ", "") ?? "";
 
@@ -374,13 +321,7 @@ namespace AMS.Areas.Admin.Controllers
             var fileName = $"{fullName}{monthName}{yearTwoDigit}.pdf";
 
             return File(pdfBytes, "application/pdf", fileName);
-
-
-
-
         }
-
-      
 
 
         public IActionResult Test()

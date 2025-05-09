@@ -1,10 +1,12 @@
-﻿using QuestPDF.Fluent;
+﻿
+using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using QuestPDF.Drawing;
 using AMS.Models;
 using AMS.Models.ViewModel;
 using System;
+using System.Linq;
 
 namespace AMS.Helpers
 {
@@ -28,29 +30,29 @@ namespace AMS.Helpers
                 page.PageColor(Colors.White);
                 page.DefaultTextStyle(x => x.FontSize(12));
 
-                // Show header only on the first page
+                // Header
                 page.Header().ShowOnce().Column(col =>
                 {
                     col.Item().Row(row =>
                     {
                         row.ConstantItem(60).Image("wwwroot/images/company-logo.png", ImageScaling.FitArea);
-                        row.RelativeItem(); // spacer
+                        row.RelativeItem();
                     });
 
                     col.Item().AlignCenter().Text("Employee Attendance Details")
                         .SemiBold().FontSize(20).FontColor(Colors.Black);
                 });
 
+                // Content
                 page.Content().Column(col =>
                 {
                     col.Spacing(5);
 
-                    // ⬇️ Add some space between the title and the employee details box
+                    // Employee Info Box
                     col.Item().PaddingTop(15).Border(1).Padding(10).Column(empBox =>
                     {
                         empBox.Spacing(5);
 
-                        // Employee Info - Two columns layout
                         empBox.Item().Row(row =>
                         {
                             row.RelativeItem().Text(txt =>
@@ -66,21 +68,6 @@ namespace AMS.Helpers
                             });
                         });
 
-                        //empBox.Item().Row(row =>
-                        //{
-                        //    row.RelativeItem().Text(txt =>
-                        //    {
-                        //        txt.Span("📱 Phone: ").SemiBold();
-                        //        txt.Span($"{_model.Employee?.PhoneNumber ?? "N/A"}");
-                        //    });
-
-                        //    row.RelativeItem().Text(txt =>
-                        //    {
-                        //        txt.Span("🧑‍💼 Designation: ").SemiBold();
-                        //        txt.Span($"{_model.Employee?.Designation ?? "N/A"}");
-                        //    });
-                        //});
-
                         empBox.Item().Row(row =>
                         {
                             row.RelativeItem().Text(txt =>
@@ -94,11 +81,31 @@ namespace AMS.Helpers
                                 txt.Span("🧑‍💼 Designation: ").SemiBold();
                                 txt.Span($"{_model.Employee?.Designation ?? "N/A"}");
                             });
-
-                            //row.RelativeItem().Text(""); // Empty to balance layout
                         });
                     });
 
+                    // ✅ Attendance Status Summary
+                    int presentCount = _model.AttendanceRecord?.Count(a => a.Status?.ToLower() == "present") ?? 0;
+                    int absentCount = _model.AttendanceRecord?.Count(a => a.Status?.ToLower() == "absent") ?? 0;
+                    int leaveCount = _model.AttendanceRecord?.Count(a => a.Status?.ToLower() == "leave") ?? 0;
+                    int halfDayCount = _model.AttendanceRecord?.Count(a => a.Status?.ToLower() == "half day") ?? 0;
+
+                    col.Item().PaddingTop(10).Text(text =>
+                    {
+                        text.Span("✔️ Present: ").SemiBold().FontColor(Colors.Green.Darken2);
+                        text.Span($"{presentCount}    ");
+
+                        text.Span("❌ Absent: ").SemiBold().FontColor(Colors.Red.Darken2);
+                        text.Span($"{absentCount}    ");
+
+                        text.Span("⏸️ Leave: ").SemiBold().FontColor(Colors.Orange.Darken2);
+                        text.Span($"{leaveCount}    ");
+
+                        text.Span("🌓 Half Day: ").SemiBold().FontColor(Colors.Blue.Darken2);
+                        text.Span($"{halfDayCount}");
+                    });
+
+                    // Month-Year Title
                     var monthYear = _model.AttendanceRecord?.FirstOrDefault()?.AttendanceDate.ToString("MMMM yyyy") ?? "";
                     col.Item().PaddingTop(10).Text($"📅 Attendance Record: {monthYear}")
                         .Bold().FontSize(12).FontColor(Colors.Black);
@@ -115,7 +122,6 @@ namespace AMS.Helpers
                             columns.RelativeColumn(2); // Hours
                         });
 
-                        // Table Header
                         table.Header(header =>
                         {
                             header.Cell().Background(Colors.Grey.Lighten2).Padding(3).Text("Date").Bold().FontSize(10);
@@ -125,7 +131,6 @@ namespace AMS.Helpers
                             header.Cell().Background(Colors.Grey.Lighten2).Padding(3).Text("Hours").Bold().FontSize(10);
                         });
 
-                        // Table Rows
                         if (_model.AttendanceRecord != null)
                         {
                             foreach (var attendance in _model.AttendanceRecord)
@@ -137,7 +142,9 @@ namespace AMS.Helpers
                                 string status = attendance.Status?.ToLower() ?? "unknown";
                                 string bgColor = status == "absent" ? Colors.Red.Lighten3 :
                                                  status == "present" ? Colors.Green.Lighten4 :
-                                                 Colors.Yellow.Lighten3;
+                                                 status == "leave" ? Colors.Orange.Lighten3 :
+                                                 status == "half day" ? Colors.Blue.Lighten4 :
+                                                 Colors.Grey.Lighten3;
 
                                 table.Cell().Background(bgColor).Padding(2).Text(attendance.AttendanceDate.ToString("dd MMM yyyy")).FontSize(9);
                                 table.Cell().Background(bgColor).Padding(2).Text(DateTime.Today.Add(attendance.CheckInTime).ToString("hh:mm tt")).FontSize(9);
@@ -153,37 +160,15 @@ namespace AMS.Helpers
                             }
                         }
                     });
-
-                    //col.Item().PaddingTop(60).Row(row =>
-                    //{
-                    //    row.RelativeItem().AlignRight().Text("🖊️ HR Signature: ____________________________");
-                    //});
                 });
 
-
-                //page.Footer().AlignCenter().Text(x =>
-                //{
-                //    x.CurrentPageNumber();
-                //    x.Span(" / ");
-                //    x.TotalPages();
-
-                //    x.Span("  Generated on: ");
-                //    x.Span(DateTime.Now.ToString("dd MMM yyyy HH:mm")).FontColor(Colors.Grey.Darken1);
-                //});
-
+                // Footer
                 page.Footer().Column(footer =>
                 {
                     footer.Spacing(5);
-
                     footer.Item().Row(row =>
                     {
                         row.RelativeItem().AlignRight().Text("🖊️ HR Signature: ____________________________");
-                        //row.RelativeItem().AlignRight().Text(text =>
-                        //{
-                        //    text.CurrentPageNumber();
-                        //    text.Span(" / ");
-                        //    text.TotalPages();
-                        //});
                     });
 
                     footer.Item().AlignCenter().Text(text =>
@@ -196,3 +181,5 @@ namespace AMS.Helpers
         }
     }
 }
+
+

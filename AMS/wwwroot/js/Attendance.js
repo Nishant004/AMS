@@ -135,18 +135,25 @@ function fetchAttendance() {
                     grouped[empId] = {
                         name: item.employeeName || `Employee ${empId}`,
                         attendance: {}
-                    };
+                    }
                 }
                 grouped[empId].attendance[date] = item.status;
             });
 
 
+
+            //console.log("Grouped Attendance Data:", grouped);
+         
             // Build rows
             for (const empId in grouped) {
                 const employee = grouped[empId];
                 //let row = `<tr><td>${employee.name}</td>`;
+                //console.log("month", month)
+                //console.log("year", year)
 
-                let row = `<tr><td><a href="/Admin/Dashboard/EmployeeDetails/${empId}">${employee.name}</a></td>`;
+                let row = `<tr><td><a href="/Admin/Dashboard/EmployeeDetails/${empId}?month=${month}&year=${year}">${employee.name}</a></td>`;
+
+                
                 //let employeeUrl = employeeDetailsBaseUrl.replace('__ID__', empId);
                 //let row = `<tr><td><a href="${employeeUrl}">${employee.name}</a></td>`;
                 for (let d = 1; d <= daysInMonth; d++) {

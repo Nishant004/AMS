@@ -33,8 +33,7 @@ namespace AMS.Controllers
 
             var employee = await _adminRepository.GetAllAsync();
 
-            Console.WriteLine("show it: " +employee);
-
+        
 
             int totalEmployees = employee.Count();
 
@@ -76,7 +75,7 @@ namespace AMS.Controllers
 
         public async Task<IActionResult> GetEmployees()
         {
-            Console.WriteLine("GetEmployees Controller called");
+           
 
             var employee = await _adminRepository.GetAllAsync();
 
@@ -89,9 +88,12 @@ namespace AMS.Controllers
             return Json(result);
         }
 
+
+
+        [HttpGet]
         public async Task<IActionResult> GetEmployeeAttendance(int employee, int month, int year)
         {
-            Console.WriteLine("GetEmployeeAttendance Controller called");
+           
 
             var employeeDetails = await _adminRepository.GetAllAsync();
 
@@ -103,18 +105,49 @@ namespace AMS.Controllers
 
             var result = await _adminRepository.GetAttendanceByMonthYearAsync(employee, month, year);
 
+
             // Join attendance with employee name
+
             var enrichedResult = result.Select(att =>
             {
                 var emp = employeeResult.FirstOrDefault(e => e.id == att.EmployeeID);
                 return new
                 {
                     employeeID = att.EmployeeID,
-                    employeeName = emp != null ? emp.name : "Unknown",
+                    employeeName = emp != null ? emp.name : "Holiday", // show 'Holiday' for cross-joined holiday records
                     attendanceDate = att.AttendanceDate,
-                    status = att.Status
+                    status = att.Status // unified field
                 };
             });
+
+
+
+
+            //var enrichedResult = result.Where(att => att.EmployeeID != null).Select(att =>
+            //{
+            //    var emp = employeeResult.FirstOrDefault(e => e.id == (int)att.EmployeeID);
+            //    return new
+            //    {
+            //        employeeID = att.EmployeeID,
+            //        employeeName = emp != null ? emp.name : "Unknown",
+            //        attendanceDate = att.AttendanceDate,
+            //        status = att.AttendanceStatus, // Use the consistent field name
+            //        entryType = att.EntryType
+            //    };
+            //});
+
+
+            //var enrichedResult = result.Select(att =>
+            //{
+            //    var emp = employeeResult.FirstOrDefault(e => e.id == att.EmployeeID);
+            //    return new
+            //    {
+            //        employeeID = att.EmployeeID,
+            //        employeeName = emp != null ? emp.name : "Unknown",
+            //        attendanceDate = att.AttendanceDate,
+            //        status = att.Status
+            //    };
+            //});
 
             return new JsonResult(enrichedResult);
         }

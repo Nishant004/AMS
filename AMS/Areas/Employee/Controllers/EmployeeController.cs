@@ -245,7 +245,6 @@ namespace AMS.Areas.Employee.Controllers
             // Fetch attendance data from the repository
             var attendanceData = await _employeeRepository.GetAttendanceByMonthYearAsyncById(employeeId, month, year);
 
-            Console.WriteLine("attendanceData", attendanceData);
             // If no data is found, return a message
             if (attendanceData == null || !attendanceData.Any())
             {

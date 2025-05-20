@@ -148,15 +148,12 @@ namespace AMS.Areas.Employee.Controllers
                     return BadRequest(new { message = "No check-in record found for today" });
                 }
 
-                Console.WriteLine("After GetAttendanceByEmployeeDateAsync");
 
                 //ip update
                 var forwardedIp = HttpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault();
                 var ip = string.IsNullOrEmpty(forwardedIp)
                     ? HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString()
                     : forwardedIp;
-
-                Console.WriteLine($"User IP: {ip}");
 
 
 
@@ -186,7 +183,7 @@ namespace AMS.Areas.Employee.Controllers
 
                 await _employeeRepository.UpdateAttendanceAsync(attendance);
 
-                await _employeeRepository.LogCheckOutAsync(attendance.AttendanceID, attendance.CheckInTime, checkOutTime, attendance.CheckInLat, attendance.CheckInLong, checkOutLat, checkOutLong);
+                await _employeeRepository.LogCheckOutAsync(attendance.AttendanceID, attendance.CheckInTime ?? TimeSpan.Zero, checkOutTime, attendance.CheckInLat, attendance.CheckInLong, checkOutLat, checkOutLong);
 
                 return Ok(new { message = "Checked out successfully", checkOutTime });
             }

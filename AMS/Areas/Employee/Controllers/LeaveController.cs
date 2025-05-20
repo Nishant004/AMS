@@ -50,7 +50,7 @@ namespace AMS.Areas.Employee.Controllers
             {
                 StartDate = DateTime.Now.Date,
                 EndDate = DateTime.Now.Date,
-                EmployeeId = userSession.EmployeeId
+                EmployeeID = userSession.EmployeeId
             };
 
 
@@ -72,7 +72,7 @@ namespace AMS.Areas.Employee.Controllers
                 return RedirectToAction("Index", "Home", new { area = "" });
             }
 
-            leave.EmployeeId = userSession.EmployeeId;
+            leave.EmployeeID = userSession.EmployeeId;
             leave.Status = "Pending";
 
             await _leaveRepository.CreateLeaveRequestAsync(leave);
@@ -93,7 +93,7 @@ namespace AMS.Areas.Employee.Controllers
 
             var idColumn = "LeaveId";
             var leave = await _leaveRepository.GetLeaveByIdAsync(idColumn, id);
-            if (leave == null || leave.EmployeeId != userSession.EmployeeId)
+            if (leave == null || leave.EmployeeID != userSession.EmployeeId)
             {
                 TempData["ErrorMessage"] = "Leave request not found or access denied.";
                 return RedirectToAction(nameof(Index));

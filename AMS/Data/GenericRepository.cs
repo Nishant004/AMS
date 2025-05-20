@@ -125,13 +125,7 @@ namespace AMS.Data
         }
 
 
-        //public async Task<int> DeleteAsync(string idColumn, int id)
-        //{
-        //    var query = $"DELETE FROM {_tableName} WHERE {idColumn} = @Id";
-        //    using var connection = _context.CreateConnection();
-        //    return await connection.ExecuteAsync(query, new { Id = id });
-        //}
-
+     
 
         public async Task<int> DeleteAsync(string idColumn, int id)
         {
@@ -166,18 +160,7 @@ namespace AMS.Data
             return await connection.QuerySingleOrDefaultAsync<T>(query, new { Username = username, Password = password });
         }
 
-        // ✅ New method: Login query using username and password columns
-        //public async Task<T> GetByUserCredentialsAsync(string usernameColumn, string passwordColumn, string roleColumn, string username, string password, string role)
-        //{
-        //    Console.WriteLine("GetByUserCredentialsAsync Called");
-
-        //    var query = $"SELECT * FROM [{_tableName}] WHERE {usernameColumn} = @Username AND {passwordColumn} = @Password AND {roleColumn} = @Role";
-        //    using var connection = _context.CreateConnection();
-        //    return await connection.QuerySingleOrDefaultAsync<T>(query, new { Username = username, Password = password, Role = role });
-        //}
-
-
-
+  
 
 
         public async Task<(T? user, bool isDeactivated)> GetByUserCredentialsAsync<T>(
@@ -228,40 +211,6 @@ namespace AMS.Data
 
 
 
-
-        // ✅ New method: Get attendance records optionally filtered by employee
-        //public async Task<IEnumerable<dynamic>> GetAttendanceByMonthYearAsync(int employee, int month, int year)
-        //{
-        //    using var connection = _context.CreateConnection();
-
-        //    string query = @"SELECT 
-        //                Attendance.AttendanceDate,
-        //                Attendance.CheckInTime,
-        //                Attendance.CheckOutTime,
-        //                Attendance.Status,
-        //                Attendance.Remarks,
-        //                Attendance.EmployeeID
-        //            FROM Attendance
-        //            INNER JOIN Employees ON Attendance.EmployeeID = Employees.EmployeeID
-        //            WHERE MONTH(Attendance.AttendanceDate) = @Month
-        //              AND YEAR(Attendance.AttendanceDate) = @Year
-        //              AND Employees.IsDelete = 0"; // Filter on Employees.IsDelete
-
-        //    if (employee != 0)
-        //    {
-        //        query += " AND Attendance.EmployeeID = @EmployeeID";
-        //    }
-
-        //    return await connection.QueryAsync(query, new
-        //    {
-        //        EmployeeID = employee,
-        //        Month = month,
-        //        Year = year
-        //    });
-        //}
-
-
-
         public async Task<IEnumerable<dynamic>> GetAttendanceByMonthYearAsync(int employee, int month, int year)
         {
             using var connection = _context.CreateConnection();
@@ -307,109 +256,6 @@ namespace AMS.Data
             });
 
 
-            //        string query = @"
-            //-- Employee Attendance
-            //SELECT 
-            //    A.AttendanceDate,
-            //    A.CheckInTime,
-            //    A.CheckOutTime,
-            //    A.Status AS AttendanceStatus,
-            //    A.Remarks,
-            //    A.EmployeeID,
-            //    'Attendance' AS EntryType
-            //FROM Attendance A
-            //INNER JOIN Employees E ON A.EmployeeID = E.EmployeeID
-            //WHERE MONTH(A.AttendanceDate) = @Month
-            //AND YEAR(A.AttendanceDate) = @Year
-            //AND E.IsDelete = 0" + (employee != 0 ? " AND A.EmployeeID = @EmployeeID" : "") + @"
-            //UNION ALL
-            //-- Holidays for selected employees only
-            //SELECT 
-            //    H.HolidayDate AS AttendanceDate,
-            //    NULL AS CheckInTime,
-            //    NULL AS CheckOutTime,
-            //    H.Status AS AttendanceStatus,
-            //    H.HolidayName AS Remarks,
-            //    E.EmployeeID,
-            //    'Holiday' AS EntryType
-            //FROM Holidays H
-            //CROSS JOIN Employees E
-            //WHERE MONTH(H.HolidayDate) = @Month
-            //AND YEAR(H.HolidayDate) = @Year
-            //AND E.IsDelete = 0" + (employee != 0 ? " AND E.EmployeeID = @EmployeeID" : "");
-
-            //        return await connection.QueryAsync(query, new
-            //        {
-            //            EmployeeID = employee,
-            //            Month = month,
-            //            Year = year
-            //      });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            //            string query = @"
-            //    -- Employee Attendance
-            //    SELECT 
-            //        A.AttendanceDate,
-            //        A.CheckInTime,
-            //        A.CheckOutTime,
-            //        A.Status,
-            //        A.Remarks,
-            //        A.EmployeeID,
-            //        NULL AS HolidayName,
-            //        NULL AS Status,
-            //        'Attendance' AS EntryType
-            //        FROM Attendance A
-            //        INNER JOIN Employees E ON A.EmployeeID = E.EmployeeID
-            //        WHERE MONTH(A.AttendanceDate) = @Month
-            //        AND YEAR(A.AttendanceDate) = @Year
-            //         AND E.IsDelete = 0" + (employee != 0 ? " AND A.EmployeeID = @EmployeeID" : "") + @"
-
-            //    UNION ALL
-
-            //    -- Holidays (Public Holidays or Weekends)
-            //    SELECT 
-            //        H.HolidayDate AS AttendanceDate,
-            //        NULL AS CheckInTime,
-            //        NULL AS CheckOutTime,
-            //        NULL AS Status,
-            //        NULL AS Remarks,
-            //        NULL AS EmployeeID,
-            //        H.HolidayName,
-            //        H.Status AS HolidayStatus,
-            //       'Holiday' AS EntryType
-            //        FROM Holidays H
-            //        WHERE MONTH(H.HolidayDate) = @Month
-            //        AND YEAR(H.HolidayDate) = @Year
-            //";
-
-            //            return await connection.QueryAsync(query, new
-            //            {
-            //                EmployeeID = employee,
-            //                Month = month,
-            //                Year = year
-            //            });
-
-
-
-
-
-
-
         }
 
 
@@ -436,8 +282,7 @@ namespace AMS.Data
             var query = "SELECT * FROM Attendance WHERE EmployeeID = @EmployeeID AND CONVERT(DATE, AttendanceDate) = @AttendanceDate";
 
 
-            Console.WriteLine($"Executing Query: {query}");
-            Console.WriteLine($"Params: EmployeeID = {employeeId}, AttendanceDate = {date:yyyy-MM-dd}");
+        
 
             //return await connection.QuerySingleOrDefaultAsync<Attendance>(query, new { EmployeeID = employeeId, AttendanceDate = date.Date });
             return await connection.QueryFirstOrDefaultAsync<Attendance>(query, new { EmployeeID = employeeId, AttendanceDate = date.Date });
@@ -472,7 +317,7 @@ namespace AMS.Data
                 attendance.CheckOutTime,
                 attendance.CheckOutLat,
                 attendance.CheckOutLong,
-                attendance.EmployeeId,
+                attendance.EmployeeID,
                 attendance.AttendanceDate,
                 attendance.CheckoutIP,
                 attendance.FollowUpShift

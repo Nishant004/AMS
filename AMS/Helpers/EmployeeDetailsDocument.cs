@@ -147,7 +147,12 @@ namespace AMS.Helpers
                                                  Colors.Grey.Lighten3;
 
                                 table.Cell().Background(bgColor).Padding(2).Text(attendance.AttendanceDate.ToString("dd MMM yyyy")).FontSize(9);
-                                table.Cell().Background(bgColor).Padding(2).Text(DateTime.Today.Add(attendance.CheckInTime).ToString("hh:mm tt")).FontSize(9);
+                                //table.Cell().Background(bgColor).Padding(2).Text(DateTime.Today.Add(attendance.CheckInTime).ToString("hh:mm tt")).FontSize(9);
+                                table.Cell().Background(bgColor).Padding(2).Text(
+                                    attendance.CheckInTime.HasValue
+                                        ? DateTime.Today.Add(attendance.CheckInTime.Value).ToString("hh:mm tt")
+                                        : "--"
+                                ).FontSize(9);
                                 table.Cell().Background(bgColor).Padding(2).Text(
                                     attendance.CheckOutTime.HasValue
                                         ? DateTime.Today.Add(attendance.CheckOutTime.Value).ToString("hh:mm tt")

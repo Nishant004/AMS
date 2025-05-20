@@ -8,18 +8,6 @@
 
 <div class="container-fluid">
 
-	@* @foreach (var item in Model)
-	{
-		<p>@item.AttendanceId</p>
-		<p>@item.EmployeeId</p>
-		<p>@item.CheckInTime</p>
-		<p>@item.CheckOutTime</p>
-		<p>@item.Status</p>
-		<p>@item.Remarks</p>
-	}
- *@
-
-
 	<!--start row-->
 	<div class="row row-cols-1 row-cols-md-2 row-cols-xl-4">
 		<div class="col">
@@ -110,16 +98,6 @@
 
 
 
-
-	@* 
-<h1 class="text-center fw-bold text-success mb-4" style="font-size: 2.5rem;">
-    📋 Attendance Sheet
-</h1> *@
-
-
-	@* attendance view *@
-
-
 	<div class="container my-4">
 		<form id="attendanceForm">
 			<div class="row g-3 align-items-end">
@@ -163,33 +141,6 @@
 
 
 	<partial name="_AttendanceTable" />
-
-	@* 
-<div id="noDataMessage" class="text-center text-danger my-3" style="display: none;"></div>
-
-<div id="instructions" class="d-none flex-wrap gap-3 p-3 mb-3 border rounded-4 shadow-sm bg-light" style="display: none;">
-    <span class="badge bg-success fs-6 px-3 py-2">✔️ Present</span>
-    <span class="badge bg-danger fs-6 px-3 py-2">❌ Absent</span>
-    <span class="badge bg-warning text-dark fs-6 px-3 py-2">⏸️ Leave</span>
-    <span class="badge bg-info text-dark fs-6 px-3 py-2">🌓 Half Day</span>
-</div>
-
-<div id="attendanceTableContainer">
-    <div class="table-responsive mt-4">
-        <table class="table table-bordered text-center align-middle" id="attendanceTable">
-            <thead id="attendanceHead">
-                <!-- Header will be built dynamically in JS -->
-            </thead>
-            <tbody id="attendanceBody">
-                <!-- Data rows will be injected here -->
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<script src="~/lib/jquery/dist/jquery.min.js"></script>
-<script src="~/js/attendance.js"></script>
-*@
 
 
 

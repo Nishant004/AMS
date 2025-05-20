@@ -6,12 +6,12 @@ namespace AMS.Models
     {
         public int AttendanceID { get; set; }
 
-        public int EmployeeId { get; set; }
-
-
+        public int EmployeeID { get; set; }
+        public int LeaveID { get; set; }
+       
         public DateTime AttendanceDate { get; set; }
 
-        public TimeSpan CheckInTime { get; set; }
+        public TimeSpan? CheckInTime { get; set; }
 
 
         public TimeSpan? CheckOutTime { get; set; }

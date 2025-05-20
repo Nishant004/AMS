@@ -26,7 +26,7 @@
 
 
 function GetEmployees() {
-    console.log("GetEmployees is running");
+   
 
     $.ajax({
         url: '/Attendance/GetEmployees',
@@ -85,9 +85,9 @@ function fetchAttendance() {
 
 
         success: function (data) {
-            console.log("hi");
-            console.log('Received data:', data); 
-            console.log("employeeId:", employeeId);
+            //console.log("hi");
+            //console.log('Received data:', data); 
+            //console.log("employeeId:", employeeId);
 
 
 

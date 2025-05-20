@@ -114,40 +114,12 @@ namespace AMS.Controllers
                 return new
                 {
                     employeeID = att.EmployeeID,
-                    employeeName = emp != null ? emp.name : "Holiday", // show 'Holiday' for cross-joined holiday records
+                    employeeName = emp != null ? emp.name : "Unknown", // show 'Holiday' for cross-joined holiday records
                     attendanceDate = att.AttendanceDate,
                     status = att.Status // unified field
                 };
             });
 
-
-
-
-            //var enrichedResult = result.Where(att => att.EmployeeID != null).Select(att =>
-            //{
-            //    var emp = employeeResult.FirstOrDefault(e => e.id == (int)att.EmployeeID);
-            //    return new
-            //    {
-            //        employeeID = att.EmployeeID,
-            //        employeeName = emp != null ? emp.name : "Unknown",
-            //        attendanceDate = att.AttendanceDate,
-            //        status = att.AttendanceStatus, // Use the consistent field name
-            //        entryType = att.EntryType
-            //    };
-            //});
-
-
-            //var enrichedResult = result.Select(att =>
-            //{
-            //    var emp = employeeResult.FirstOrDefault(e => e.id == att.EmployeeID);
-            //    return new
-            //    {
-            //        employeeID = att.EmployeeID,
-            //        employeeName = emp != null ? emp.name : "Unknown",
-            //        attendanceDate = att.AttendanceDate,
-            //        status = att.Status
-            //    };
-            //});
 
             return new JsonResult(enrichedResult);
         }

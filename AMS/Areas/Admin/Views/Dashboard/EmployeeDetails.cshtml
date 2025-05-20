@@ -87,9 +87,14 @@
 								<td>@attendance.AttendanceDate.ToString("dd MMM yyyy")</td>
 
 								<td>
-									<span class="badge bg-success">
+							@* 		<span class="badge bg-success">
 								@DateTime.Today.Add(attendance.CheckInTime).ToString("hh:mm tt")
-									</span>
+									</span> *@
+
+							<span class="badge bg-success">
+								@(attendance.CheckInTime.HasValue
+								? DateTime.Today.Add(attendance.CheckInTime.Value).ToString("hh:mm tt"): "N/A")
+							</span>
 								</td>
 								<td>
 							@if (attendance.CheckOutTime.HasValue)

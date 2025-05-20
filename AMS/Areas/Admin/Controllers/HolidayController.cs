@@ -13,6 +13,7 @@ using System.Linq.Expressions;
 using AMS.Models.ViewModel;
 using Azure.Core;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 
 namespace YourNamespace.Controllers
 {
@@ -25,20 +26,16 @@ namespace YourNamespace.Controllers
         private readonly IHolidayRepository _holidayRepository;
         private readonly ILeaveRepository _leaveRepository;
         private readonly IEmployeeRepository _employeeRepository;
-        public HolidayController(IHolidayQuotaRepository holidayQuotaRepository, IHolidayRepository holidayRepository, ILeaveRepository leaveRepository, IEmployeeRepository employeeRepository)
+        private readonly IAttendanceRepository _attendanceRepository;
+        public HolidayController(IHolidayQuotaRepository holidayQuotaRepository, IHolidayRepository holidayRepository, ILeaveRepository leaveRepository, IEmployeeRepository employeeRepository , IAttendanceRepository attendanceRepository)
         {
             _holidayQuotaRepository = holidayQuotaRepository;
             _holidayRepository = holidayRepository;
             _leaveRepository = leaveRepository;
             _employeeRepository = employeeRepository;
+            _attendanceRepository = attendanceRepository;
         }
 
-        //public IActionResult Index()
-        //{
-        //    return View();
-        //}
-
-        // View for holiday admin functions
         [HttpGet]
         public IActionResult HolidayManagement()
         {
@@ -122,6 +119,8 @@ namespace YourNamespace.Controllers
 
 
 
+       
+
         [HttpPost]
         public async Task<IActionResult> UpdateLeaveStatus([FromBody] LeaveStatusUpdateDto dto)
         {
@@ -133,25 +132,71 @@ namespace YourNamespace.Controllers
 
             try
             {
-
                 var idColumn = "LeaveId";
-                // 🟡 Step 1: Get full existing leave record
+
+                // 🔹 Step 1: Get existing leave
                 var existing = await _leaveRepository.GetLeaveByIdAsync(idColumn, dto.LeaveId);
+        
                 if (existing == null)
                     return NotFound("Leave request not found.");
 
-                // 🟢 Step 2: Only update status
+                // 🔹 Step 2: Update status
                 existing.Status = dto.Status;
-
-                // 🟢 Step 3: Perform update
-
                 var updated = await _leaveRepository.UpdateAsync(idColumn, existing);
 
-                return Ok("Status updated.");
+
+                if (dto.Status.Equals("Approved", StringComparison.OrdinalIgnoreCase))
+                {
+                    var startDate = Convert.ToDateTime(existing.StartDate);
+                    var endDate = Convert.ToDateTime(existing.EndDate);
+
+                    for (DateTime date = startDate; date <= endDate; date = date.AddDays(1))
+                    {
+                        if (await _holidayRepository.ExistsAsync(date))
+                        {
+                            continue; // Don't update or insert attendance on holidays
+                        }
+
+                        // Proceed with attendance logic
+                        var attendance = await _attendanceRepository.GetByEmployeeAndDateAsync(existing.EmployeeID, date);
+
+                        if (attendance != null)
+                        {
+                            // Update existing attendance
+                            attendance.Status = "Leave";
+                            attendance.LeaveID = existing.LeaveID; // ✅ Link to LeaveRequest
+                            attendance.AttendanceDate = date; // Ensure the date is set correctly
+                            attendance.EmployeeID = existing.EmployeeID;
+                            attendance.CheckInTime = null;
+                            await _attendanceRepository.UpdateAsync("AttendanceID", attendance);
+                        }
+                        else
+                        {
+                            // Insert new attendance entry marked as Leave
+                            var newAttendance = new Attendance
+                            {
+                                EmployeeID = existing.EmployeeID,
+                                AttendanceDate = date,
+                                Status = "Leave",
+                                CheckInTime = null,
+                                LeaveID = existing.LeaveID // ✅ Link to LeaveRequest
+                            };
+
+                        await _attendanceRepository.InsertAsync(newAttendance);
+                        }
+                    }
+                }
+
+
+
+
+
+                // ✅ Triggers handle Attendance update/insertion automatically
+                return Ok("Leave status updated successfully.");
             }
             catch (Exception ex)
             {
-                return BadRequest("Update failed.");
+                return BadRequest("Update failed: " + ex.Message);
             }
         }
 
@@ -250,3 +295,49 @@ namespace YourNamespace.Controllers
 
     }
 }
+
+
+
+
+
+
+
+//public async Task<Attendance> GetByEmployeeAndDateAsync(int employeeId, DateTime date)
+//{
+//    var sql = @"
+//        SELECT TOP 1 *
+//        FROM Attendance
+//        WHERE EmployeeID = @EmployeeID AND CAST(AttendanceDate AS DATE) = @Date";
+
+//    using var connection = _context.CreateConnection();
+//    return await connection.QueryFirstOrDefaultAsync<Attendance>(sql, new
+//    {
+//        EmployeeID = employeeId,
+//        Date = date.Date
+//    });
+//}
+
+
+//ALTER TABLE Attendance
+//ADD LeaveID INT NULL;
+
+//ALTER TABLE Attendance
+//ADD CONSTRAINT FK_Attendance_LeaveRequests
+//FOREIGN KEY (LeaveID) REFERENCES LeaveRequests(LeaveID)
+//ON DELETE CASCADE;
+
+
+//INSERT INTO Attendance (EmployeeID, AttendanceDate, Status, Remarks, LeaveID)
+//VALUES (@EmployeeID, @Date, 'Leave', 'Auto-generated from leave', @LeaveID);
+
+//CREATE TRIGGER trg_DeleteAttendanceOnLeaveDelete
+//ON LeaveRequests
+//FOR DELETE
+//AS
+//BEGIN
+//    -- Delete the related attendance records
+//    DELETE FROM Attendance
+//    WHERE LeaveID IN (SELECT LeaveID FROM deleted);
+//END;
+
+

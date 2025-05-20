@@ -23,8 +23,8 @@ else
             @foreach (var leave in Model)
             {
                 <tr>
-                    <td>@leave.LeaveId</td>
-                    <td>@leave.EmployeeId</td>
+                    <td>@leave.LeaveID</td>
+                    <td>@leave.EmployeeID</td>
                     <td>@leave.LeaveType</td>
                     <td>@leave.StartDate?.ToShortDateString()</td>
                     <td>@leave.EndDate?.ToShortDateString()</td>
@@ -32,7 +32,7 @@ else
                     <td>
                         @if (leave.Status == "Pending")
                         {
-                            <select class="form-select status-dropdown" data-leave-id="@leave.LeaveId">
+                            <select class="form-select status-dropdown" data-leave-id="@leave.LeaveID">
                                 <option selected value="Pending">Pending</option>
                                 <option value="Approved">Approve</option>
                                 <option value="Rejected">Reject</option>
@@ -46,7 +46,7 @@ else
                     <td>
                         @if (leave.Status == "Pending")
                         {
-                            <button class="btn btn-sm btn-primary" onclick="updateLeaveStatus(@leave.LeaveId)">Update</button>
+                            <button class="btn btn-sm btn-primary" onclick="updateLeaveStatus(@leave.LeaveID)">Update</button>
                         }
                     </td>
                 </tr>

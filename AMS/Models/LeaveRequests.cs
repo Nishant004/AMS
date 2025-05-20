@@ -7,10 +7,10 @@ namespace AMS.Models
 
     public partial class LeaveRequests
     {
-        public int LeaveId { get; set; }
+        public int LeaveID { get; set; }
 
         [Required]
-        public int EmployeeId { get; set; }
+        public int EmployeeID { get; set; }
 
         [Required(ErrorMessage = "Leave Type is required.")]
         [RegularExpression("^(Unpaid Leave|Paid Leave|Casual Leave|Sick Leave)$",

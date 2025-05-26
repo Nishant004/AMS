@@ -262,7 +262,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Fetch Attendance Data
 function fetchAttendance() {
-    console.log("fetchAttendance called");
+   
 
     const today = new Date();
     const month = $('select[name="month"]').val() || today.getMonth() + 1;
@@ -270,9 +270,7 @@ function fetchAttendance() {
     const employeeId = $("#employee").val(); // Using the employeeId from Razor
 
 
-    //console.log(month);
-    //console.log(year);
-    //console.log(employeeId);
+   
 
     $.ajax({
         url: '/Employee/Employee/GetEmployeeAttendanceById',
@@ -289,11 +287,7 @@ function fetchAttendance() {
 
         success: function (data) {
             
-            //console.log(`${data}`);
-
-            //console.logFetched Data: " + data);
-
-            //console.log("Fetched Data: " + JSON.stringify(data, null, 2));
+           
 
             const tableHead = $('#attendanceHead');
             const tableBody = $('#attendanceBody');

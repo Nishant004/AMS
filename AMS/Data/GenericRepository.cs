@@ -291,7 +291,7 @@ namespace AMS.Data
 
         public async Task UpdateAttendanceAsync(Attendance attendance)
         {
-            // Console.WriteLine("UpdateAttendanceAsync called");
+       
 
 
             using var connection = _context.CreateConnection();
@@ -478,7 +478,7 @@ namespace AMS.Data
 
         public async Task<IEnumerable<EmpAttendanceDto>> GetAttendanceByMonthYearAsyncById(int employeeId, int month, int year)
         {
-            Console.WriteLine("Generic Repository");
+            
 
             using var connection = _context.CreateConnection();
 

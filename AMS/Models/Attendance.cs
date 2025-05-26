@@ -7,7 +7,7 @@ namespace AMS.Models
         public int AttendanceID { get; set; }
 
         public int EmployeeID { get; set; }
-        public int LeaveID { get; set; }
+        public int? LeaveID { get; set; }
        
         public DateTime AttendanceDate { get; set; }
 

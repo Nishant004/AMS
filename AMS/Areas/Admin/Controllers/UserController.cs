@@ -93,7 +93,7 @@ namespace AMS.Areas.Admin.Controllers
                 var userdetails= await _userRepository.AddAsync(user);
 
 
-                Console.WriteLine($"User:{userdetails}");
+               
 
                 TempData["SuccessMessage"] = "User created successfully!";
                 return RedirectToAction(nameof(Index));
@@ -114,7 +114,7 @@ namespace AMS.Areas.Admin.Controllers
 
             var idColumn = "UserID";
             var user = await _userRepository.GetByIdAsync(idColumn, id);
-            Console.WriteLine(id);
+           
             if (user == null)
                 return NotFound();
 
@@ -138,7 +138,7 @@ namespace AMS.Areas.Admin.Controllers
             {
                 var idColumn = "UserID";
                 var user = await _userRepository.GetByIdAsync(idColumn, id);
-                Console.WriteLine(id);
+          
 
                 if (user == null)
                 {

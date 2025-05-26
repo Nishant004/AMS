@@ -10,5 +10,6 @@ namespace AMS.Interfaces
 
         public Task<int> InsertAsync(Attendance newAttendance);
 
+
     }
 }

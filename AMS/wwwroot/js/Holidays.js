@@ -90,7 +90,7 @@ function attachAddHolidayFormHandler() {
 // Add all Sundays
 async function addSundays() {
     const year = parseInt(document.getElementById("sundayYear").value);
-    console.log("Year entered:", year); // Debug log
+   
     if (!year || year < 2000 || year > 2100) {
         document.getElementById("addSundaysResult").innerHTML =
             `<div class="alert alert-danger">Please enter a valid year (2000-2100).</div>`;

@@ -21,13 +21,15 @@ namespace AMS.Areas.Admin.Controllers
         private readonly IAdminRepository _adminRepository;
         private readonly PdfService _pdfService;
         private readonly IViewRenderService _viewRenderService;
+        private readonly IHolidayRepository _holidayRepository;
 
 
-        public DashboardController(IAdminRepository adminRepository, PdfService pdfservice, IViewRenderService viewRenderService)
+        public DashboardController(IAdminRepository adminRepository, PdfService pdfservice, IViewRenderService viewRenderService, IHolidayRepository holidayRepository)
         {
             _adminRepository = adminRepository;
             _pdfService = pdfservice;
             _viewRenderService = viewRenderService;
+            _holidayRepository = holidayRepository;
         }
 
 
@@ -58,7 +60,7 @@ namespace AMS.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([Bind("FirstName, LastName, Email, PhoneNumber, Department, Designation, JoiningDate, Status,Project")] Employees employee)
         {
-            Console.WriteLine("Create Post called");
+         
 
 
      
@@ -76,7 +78,7 @@ namespace AMS.Areas.Admin.Controllers
 
                 @employee.JoiningDate.ToString("dd/MM/yyyy");
 
-                Console.WriteLine("Date: " + employee.JoiningDate);
+               
 
                 var result = await _adminRepository.InsertAsync(employee);
 
@@ -91,7 +93,7 @@ namespace AMS.Areas.Admin.Controllers
             // Debugging Required fields
             if (!ModelState.IsValid)
             {
-                Console.WriteLine("Create: ModelState is NOT valid!");
+              
                 foreach (var modelState in ModelState.Values)
                 {
                     foreach (var error in modelState.Errors)
@@ -169,7 +171,7 @@ namespace AMS.Areas.Admin.Controllers
             // Required Field Debugging
             if (!ModelState.IsValid)
             {
-                Console.WriteLine("Edit: ModelState is NOT valid!");
+      
                 foreach (var modelState in ModelState.Values)
                 {
                     foreach (var error in modelState.Errors)
@@ -199,8 +201,6 @@ namespace AMS.Areas.Admin.Controllers
             string idColumn = "EmployeeId";
             var existingEmployee = await _adminRepository.GetByIdAsync(idColumn, id);
 
-            Console.WriteLine("GET: ID Value: " + id);
-            Console.WriteLine("GET: existingEmployee: " + existingEmployee);
 
             if (existingEmployee == null)
             {
@@ -212,7 +212,7 @@ namespace AMS.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> DeleteConfirm(int EmployeeId)
         {
-            Console.WriteLine("ConfirmDelete Called");
+      
 
        
             var userSession = SessionHelper.GetUserSession(HttpContext);
@@ -227,12 +227,11 @@ namespace AMS.Areas.Admin.Controllers
             string idColumn = "EmployeeId";
             var existingEmployee = await _adminRepository.GetByIdAsync(idColumn, EmployeeId);
 
-            Console.WriteLine("ID Value: " + EmployeeId);
-            Console.WriteLine("existingEmployee: " + existingEmployee);
+     
 
             if (existingEmployee != null)
             {
-                Console.WriteLine("existingEmployee Called");
+              
 
                 var result = await _adminRepository.DeleteAsync(idColumn, EmployeeId);
 
@@ -272,10 +271,11 @@ namespace AMS.Areas.Admin.Controllers
                     .ToList();
             }
 
+
             var viewModel = new EmployeeDetailsViewModel
             {
                 Employee = employee,
-                AttendanceRecord = attendence.ToList()
+                AttendanceRecord = attendence.ToList(),
             };
 
             return View(viewModel);
@@ -301,10 +301,17 @@ namespace AMS.Areas.Admin.Controllers
                 .Where(a => a.AttendanceDate.Month == month && a.AttendanceDate.Year == year)
                 .ToList();
 
+
+            var holidays = await _holidayRepository.GetAllHolidays(); // implement this method if not present
+            holidays = holidays
+                .Where(h => h.HolidayDate.Month == month && h.HolidayDate.Year == year)
+                .ToList();
+
             var model = new EmployeeDetailsViewModel
             {
                 Employee = employee,
-                AttendanceRecord = (List<Attendance>)attendance
+                AttendanceRecord = (List<Attendance>)attendance,
+                HolidayList = (List<Holidays>)holidays
             };
 
             var document = new EmployeeDetailsDocument(model);
@@ -326,7 +333,7 @@ namespace AMS.Areas.Admin.Controllers
 
         public IActionResult Test()
         {
-            Console.WriteLine("Test Called");
+      
             return View();
         }
 

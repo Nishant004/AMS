@@ -62,7 +62,7 @@ namespace AMS.Areas.Employee.Controllers
         [HttpPost]
         public async Task<IActionResult> CheckIn(int employeeId, string location, string followUpShift)
         {
-            Console.WriteLine("CheckIn Controller called");
+        
 
 
             var forwardedIp = HttpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault();
@@ -73,8 +73,6 @@ namespace AMS.Areas.Employee.Controllers
 
 
 
-            Console.WriteLine($"User IP: {ip}");
-            //Console.WriteLine($"User IP: {HttpContext.Connection.RemoteIpAddress}");
             
             // Use it for logging, storing, etc.
 
@@ -96,7 +94,7 @@ namespace AMS.Areas.Employee.Controllers
                 }
             }
 
-            Console.WriteLine($"1Lat: {checkInLat},1Long: {checkInLong}");
+
 
         
 
@@ -128,7 +126,7 @@ namespace AMS.Areas.Employee.Controllers
         {
             if (_processingCheckOuts.Contains(employeeId))
             {
-                Console.WriteLine($"🚨 Duplicate CheckOut request blocked for Employee ID {employeeId}");
+             
                 return BadRequest(new { message = "Duplicate check-out request detected. Please wait." });
             }
 
@@ -136,7 +134,7 @@ namespace AMS.Areas.Employee.Controllers
             {
                 _processingCheckOuts.Add(employeeId); // Mark employee as processing
 
-                Console.WriteLine("CheckOut Controller called");
+           
 
                 var today = DateTime.Now;
                 var checkOutTime = DateTime.Now.TimeOfDay;
@@ -235,8 +233,7 @@ namespace AMS.Areas.Employee.Controllers
 
         public async Task<IActionResult> GetEmployeeAttendanceById(int employeeId, int month, int year)
         {
-            //Console.WriteLine($"GetEmployeeAttendanceById Controller called" , employeeId, month, year);
-            Console.WriteLine($"GetEmployeeAttendanceById Controller called with EmployeeID: {employeeId}, Month: {month}, Year: {year}");
+
 
 
             // Fetch attendance data from the repository

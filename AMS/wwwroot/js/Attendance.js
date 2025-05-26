@@ -65,7 +65,7 @@ function GetEmployees() {
 
 
 function fetchAttendance() {
-    console.log("fetchAttendance is called");
+
 
     const today = new Date();
     const month = $('select[name="month"]').val() || today.getMonth() + 1;
@@ -85,9 +85,7 @@ function fetchAttendance() {
 
 
         success: function (data) {
-            //console.log("hi");
-            //console.log('Received data:', data); 
-            //console.log("employeeId:", employeeId);
+       
 
 
 
@@ -102,8 +100,7 @@ function fetchAttendance() {
 
     
 
-            //console.log(`data: ${data}`);
-            //renderTable(data);
+          
 
 
             if (!data || data.length === 0) {

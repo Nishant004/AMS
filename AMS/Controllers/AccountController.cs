@@ -40,14 +40,13 @@ namespace AMS.Controllers
                     return RedirectToAction("Index", "Home", new { area = "" });
                 }
 
-                Console.WriteLine($"User found: {user.EmployeeId}");
+                
 
                 int id = user.EmployeeId;
                 string idColumn = "EmployeeId";
                 var checkActive = await _employeeRepository.GetByIdAsync(idColumn,id);
 
-                Console.WriteLine($"Empl found: {checkActive?.Status}");
-
+              
 
                 if (checkActive?.Status == "Inactive")
                 {
@@ -85,7 +84,7 @@ namespace AMS.Controllers
                     return RedirectToAction("Index", "Home", new { area = "" });
                 }
 
-                Console.WriteLine($"User found: {user.Username}, Role: {user.Role}");
+               
 
 
                 // 2. Save session

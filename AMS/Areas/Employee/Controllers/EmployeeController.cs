@@ -15,11 +15,13 @@ namespace AMS.Areas.Employee.Controllers
     {
 
         private readonly IEmployeeRepository _employeeRepository;
+        private readonly IAdminRepository _adminRepository;
 
 
-        public EmployeeController(IEmployeeRepository employeeRepository)
+        public EmployeeController(IEmployeeRepository employeeRepository, IAdminRepository adminRepository)
         {
             _employeeRepository = employeeRepository;
+            _adminRepository = adminRepository;
         }
 
         public async Task<IActionResult> Index()
@@ -239,7 +241,10 @@ namespace AMS.Areas.Employee.Controllers
             // Fetch attendance data from the repository
             var attendanceData = await _employeeRepository.GetAttendanceByMonthYearAsyncById(employeeId, month, year);
 
+            //var attendanceData = await _adminRepository.GetAttendanceByMonthYearAsync(employeeId, month, year);
+
             // If no data is found, return a message
+
             if (attendanceData == null || !attendanceData.Any())
             {
                 return Json(new { message = "No attendance records found for this employee." });

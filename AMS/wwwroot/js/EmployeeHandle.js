@@ -260,34 +260,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-// Fetch Attendance Data
+
+
+//Fetch Attendance Data
+
+
 function fetchAttendance() {
-   
+
 
     const today = new Date();
     const month = $('select[name="month"]').val() || today.getMonth() + 1;
     const year = $('select[name="year"]').val() || today.getFullYear();
-    const employeeId = $("#employee").val(); // Using the employeeId from Razor
+    const employeeId = $("#employee").val() || 0;
 
 
-   
 
     $.ajax({
-        url: '/Employee/Employee/GetEmployeeAttendanceById',
+        url: '/Attendance/GetEmployeeAttendance',
         method: 'GET',
         data: {
-            employeeId: employeeId,
+            employee: employeeId,
             month: month,
             year: year
         },
-       
-     
-
 
 
         success: function (data) {
-            
-           
+
+
+
 
             const tableHead = $('#attendanceHead');
             const tableBody = $('#attendanceBody');
@@ -298,10 +299,15 @@ function fetchAttendance() {
             tableHead.empty();
             tableBody.empty();
 
-            if (!data || data.length === 0 || data.message) {
+
+
+
+
+
+            if (!data || data.length === 0) {
                 tableContainer.hide();
-                messageContainer.text(data.message || "No attendance data found for selected month and year.").show();
-                instructions.removeClass("d-flex").addClass("d-none");
+                instructions.addClass("d-none");
+                messageContainer.text("No attendance data found. Please check the employee name, month, or year.").show();
                 return;
             }
 
@@ -311,7 +317,7 @@ function fetchAttendance() {
 
             const daysInMonth = new Date(year, month, 0).getDate();
 
-            // Header rows
+            // Build table headers
             let headerRow1 = `<tr><th rowspan="2">Name</th>`;
             let headerRow2 = `<tr>`;
             for (let d = 1; d <= daysInMonth; d++) {
@@ -324,64 +330,223 @@ function fetchAttendance() {
             tableHead.append(headerRow1);
             tableHead.append(headerRow2);
 
-            // Group data by employee
-            const employeeMap = {};
+            // Group attendance by employee ID
+            const grouped = {};
             data.forEach(item => {
-                if (!employeeMap[item.employeeID]) {
-                    employeeMap[item.employeeID] = {
-                        name: item.employeeName,
+                const date = new Date(item.attendanceDate).getDate();
+                const empId = item.employeeID ?? `0`; // Use '0' for holidays-only row
+                const empName = item.employeeName || "Unknown";
+
+                if (!grouped[empId]) {
+                    grouped[empId] = {
+                        name: empName,
                         attendance: {}
                     };
                 }
-                const day = new Date(item.attendanceDate).getDate();
-                employeeMap[item.employeeID].attendance[day] = item.status;
+
+                grouped[empId].attendance[date] = item.status;
             });
 
-            // Render each employee's attendance
-            for (const empId in employeeMap) {
-                const emp = employeeMap[empId];
-                let row = `<tr><td>${emp.name}</td>`;
+            // Emoji map
+            const statusMap = {
+                "Present": "✔️",
+                "Absent": "❌",
+                "Leave": "⏸️",
+                "Half Day": "🌓",
+                "Holiday": "🎉",
+                "Public": "🎉",
+                "Weekend": "🎉"
+            };
+
+            // Build table rows
+            for (const empId in grouped) {
+                const employee = grouped[empId];
+                let row = `<tr><td>${empId === '0'
+                    ? employee.name
+                    : `<a href="/Admin/Dashboard/EmployeeDetails/${empId}?month=${month}&year=${year}">${employee.name}</a>`
+                    }</td>`;
 
                 for (let d = 1; d <= daysInMonth; d++) {
-                    const status = emp.attendance[d];
-                    if (status === "Present") {
-                        row += "<td>✔️</td>";
-                    } else if (status === "Absent") {
-                        row += "<td>❌</td>";
-                    } else if (status === "Leave") {
-                        row += "<td>⏸️</td>";
-                    } else if (status === "Half Day") {
-                        row += "<td>🌓</td>";
-                    } else {
-                        row += "<td></td>";
-                    }
+                    const dateObj = new Date(year, month - 1, d);
+                    const status = employee.attendance[d];
+                    const emoji = statusMap[status] || (dateObj.getDay() === 0 ? "🎉" : "");
+                    row += `<td title="${status || 'No data'}">${emoji}</td>`;
+                    //const emoji = statusMap[status] || (dateObj.getDay() === 0 ? "🎉" : "");
+                    //row += `<td>${emoji}</td>`;
                 }
+
                 row += "</tr>";
                 tableBody.append(row);
             }
         },
-        error: function (err) {
-            console.error("Error fetching attendance:", err);
-            $('#noDataMessage').text("Error fetching attendance data. Please try again.").show();
-            $('#attendanceTableContainer').hide();
-            $('#instructions').removeClass("d-flex").addClass("d-none");
+
+        error: function (xhr, status, error) {
+            console.error("AJAX Error:", status, error);
+            console.error("Response:", xhr.responseText);
+            console.error("Error fetching attendance:", err.responseText || err.statusText || err);
+        },
+        complete: function () {
+            console.log("AJAX complete"); // Make sure at least this fires
         }
+
     });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ //Fetch Attendance Data
+
+
+
+
+
+//function fetchAttendance() {
+   
+
+//    const today = new Date();
+//    const month = $('select[name="month"]').val() || today.getMonth() + 1;
+//    const year = $('select[name="year"]').val() || today.getFullYear();
+//    const employeeId = $("#employee").val(); // Using the employeeId from Razor
+
+
+   
+
+//    $.ajax({
+//        url: '/Employee/Employee/GetEmployeeAttendanceById',
+//        method: 'GET',
+//        data: {
+//            employeeId: employeeId,
+//            month: month,
+//            year: year
+//        },
+       
+     
+
+
+
+//        success: function (data) {
+            
+           
+
+//            const tableHead = $('#attendanceHead');
+//            const tableBody = $('#attendanceBody');
+//            const tableContainer = $('#attendanceTableContainer');
+//            const messageContainer = $('#noDataMessage');
+//            const instructions = $('#instructions');
+
+//            tableHead.empty();
+//            tableBody.empty();
+
+//            if (!data || data.length === 0 || data.message) {
+//                tableContainer.hide();
+//                messageContainer.text(data.message || "No attendance data found for selected month and year.").show();
+//                instructions.removeClass("d-flex").addClass("d-none");
+//                return;
+//            }
+
+//            messageContainer.hide();
+//            tableContainer.show();
+//            instructions.removeClass("d-none").addClass("d-flex");
+
+//            const daysInMonth = new Date(year, month, 0).getDate();
+
+//            // Header rows
+//            let headerRow1 = `<tr><th rowspan="2">Name</th>`;
+//            let headerRow2 = `<tr>`;
+//            for (let d = 1; d <= daysInMonth; d++) {
+//                const dateObj = new Date(year, month - 1, d);
+//                headerRow1 += `<th>${d}</th>`;
+//                headerRow2 += `<th>${dateObj.toLocaleDateString('en-us', { weekday: 'short' })}</th>`;
+//            }
+//            headerRow1 += `</tr>`;
+//            headerRow2 += `</tr>`;
+//            tableHead.append(headerRow1);
+//            tableHead.append(headerRow2);
+
+//            // Group data by employee
+//            const employeeMap = {};
+//            data.forEach(item => {
+//                if (!employeeMap[item.employeeID]) {
+//                    employeeMap[item.employeeID] = {
+//                        name: item.employeeName,
+//                        attendance: {}
+//                    };
+//                }
+//                const day = new Date(item.attendanceDate).getDate();
+//                employeeMap[item.employeeID].attendance[day] = item.status;
+//            });
+
+//            // Render each employee's attendance
+//            for (const empId in employeeMap) {
+//                const emp = employeeMap[empId];
+//                let row = `<tr><td>${emp.name}</td>`;
+
+//                for (let d = 1; d <= daysInMonth; d++) {
+//                    const status = emp.attendance[d];
+//                    if (status === "Present") {
+//                        row += "<td>✔️</td>";
+//                    } else if (status === "Absent") {
+//                        row += "<td>❌</td>";
+//                    } else if (status === "Leave") {
+//                        row += "<td>⏸️</td>";
+//                    } else if (status === "Half Day") {
+//                        row += "<td>🌓</td>";
+//                    } else {
+//                        row += "<td></td>";
+//                    }
+//                }
+//                row += "</tr>";
+//                tableBody.append(row);
+//            }
+//        },
+//        error: function (err) {
+//            console.error("Error fetching attendance:", err);
+//            $('#noDataMessage').text("Error fetching attendance data. Please try again.").show();
+//            $('#attendanceTableContainer').hide();
+//            $('#instructions').removeClass("d-flex").addClass("d-none");
+//        }
+//    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//}
 
 
 

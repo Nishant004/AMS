@@ -482,18 +482,51 @@ namespace AMS.Data
 
             using var connection = _context.CreateConnection();
 
+            //    string query = @"
+            //SELECT 
+            //    e.EmployeeId,
+            //    (e.FirstName + ' ' + e.LastName) AS EmployeeName,
+            //    a.AttendanceDate,
+            //    a.Status
+            //FROM Attendance a
+            //INNER JOIN Employees e ON a.EmployeeId = e.EmployeeId
+            //WHERE MONTH(a.AttendanceDate) = @Month
+            //  AND YEAR(a.AttendanceDate) = @Year
+            //  AND a.EmployeeId = @EmployeeId
+            //ORDER BY a.AttendanceDate";
+
             string query = @"
-        SELECT 
-            e.EmployeeId,
-            (e.FirstName + ' ' + e.LastName) AS EmployeeName,
-            a.AttendanceDate,
-            a.Status
-        FROM Attendance a
-        INNER JOIN Employees e ON a.EmployeeId = e.EmployeeId
-        WHERE MONTH(a.AttendanceDate) = @Month
-          AND YEAR(a.AttendanceDate) = @Year
-          AND a.EmployeeId = @EmployeeId
-        ORDER BY a.AttendanceDate";
+                -- Employee Attendance
+                SELECT 
+                    A.AttendanceDate,
+                    A.CheckInTime,
+                    A.CheckOutTime,
+                    A.Status,
+                    A.Remarks,
+                    A.EmployeeID,
+                    'Attendance' AS EntryType
+                FROM Attendance A
+                INNER JOIN Employees E ON A.EmployeeID = E.EmployeeID
+                WHERE MONTH(A.AttendanceDate) = @Month
+                  AND YEAR(A.AttendanceDate) = @Year
+                  AND E.IsDelete = 0" + (employeeId != 0 ? " AND A.EmployeeID = @EmployeeID" : "") + @"
+
+                UNION ALL
+
+                -- Holidays for employees
+                SELECT 
+                    H.HolidayDate AS AttendanceDate,
+                    NULL AS CheckInTime,
+                    NULL AS CheckOutTime,
+                    H.Description AS Status, -- 🛠️ fixed alias
+                    H.HolidayName AS Remarks,
+                    E.EmployeeID,
+                    'Holiday' AS EntryType
+                FROM Holidays H
+                CROSS JOIN Employees E
+                WHERE MONTH(H.HolidayDate) = @Month
+                  AND YEAR(H.HolidayDate) = @Year
+                  AND E.IsDelete = 0" + (employeeId != 0 ? " AND E.EmployeeID = @EmployeeID" : "");
 
             var result = await connection.QueryAsync<EmpAttendanceDto>(query, new
             {

@@ -1,0 +1,133 @@
+﻿@using AMS.Models.ViewModel
+@model EmployeeAttendanceViewModel
+
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="container text-center">
+    <h1 class="fw-bold text-primary">👋 Good Morning</h1>
+
+    <input type="hidden" id="employee" value="@ViewBag.EmployeeId" />
+
+    <div class="mt-4">
+        <div class="w-50 mx-auto text-center">
+            <button id="checkInBtn" class="btn btn-success w-100 py-3 shadow-sm fw-bold">
+                ✅ Check-In
+            </button>
+        </div>
+        <div class="w-50 mx-auto text-center">
+            <button id="checkOutBtn" class="btn btn-danger w-100 py-3 shadow-sm fw-bold">
+                🚪 Check-Out
+            </button>
+        </div>
+
+
+
+    </div>
+
+</div>
+
+
+<div class="d-flex justify-content-end mt-3">
+    <button class="btn btn-secondary me-3" data-bs-toggle="modal" data-bs-target="#attendanceLogModal">
+        📅 View Attendance Log
+    </button>
+</div>
+
+
+
+
+<!-- Attendance Details Component -->
+<div id="attendanceDetailsContainer">
+    @await Component.InvokeAsync("AttendanceDetails")
+</div>
+
+
+
+
+
+<!-- Attendance Log Modal -->
+<div class="modal fade" id="attendanceLogModal" tabindex="-1" aria-labelledby="attendanceLogModalLabel" aria-hidden="true">
+
+
+
+
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Attendance Log</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Filter controls -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Year</label>
+                        <select class="form-select" id="logYear"></select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Month</label>
+                        <select class="form-select" id="logMonth"></select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Day</label>
+                        <select class="form-select" id="logDay"></select>
+                    </div>
+                </div>
+
+                <!-- Attendance Table -->
+                <table class="table table-bordered table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Log Date & Time</th>
+                            <th>Check-In Time</th>
+                            <th>Check-Out Time</th>
+                            <th>Work Hours</th>
+                        </tr>
+                    </thead>
+
+                    <!-- Initial load will be today's logs -->
+
+                    @*  <tbody id="attendanceLogTableBody">
+
+                        @await Html.PartialAsync("_AttendanceLogRows", Model.AttendanceLogs)
+                    </tbody*@
+
+
+
+
+
+                    <tbody id="attendanceLogTableBody">
+
+                        <partial name="_AttendanceLogRows" model="Model.AttendanceLogs" />
+
+
+                    </tbody>
+
+
+
+
+
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr />
+
+
+<partial name="_EmployeeAttendanceTable" />
+
+
+@section Scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/EmployeeHandle.js"></script>
+    <script src="~/js/Clock.js"></script>
+}
+
+
+
+
